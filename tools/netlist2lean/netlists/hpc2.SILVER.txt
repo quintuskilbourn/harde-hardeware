@@ -1,0 +1,17 @@
+# SILVER verdict on tools/netlist2lean/netlists/hpc2.v
+# SHA-256: 5d5df856b095dbdab7a2528d7962a2f2863a6060413676fd4a058e938182845d
+# Module hpc2_top, NANG45 library, d<=1. Measured 2026-07-13 on the EDA box.
+# Command (from ~/sec-tools/SILVER):
+# LD_LIBRARY_PATH=lib ./bin/verify --cores 4 --verbose 1 --verilog 1 \
+#   --verilog-libfile cell/Library.txt --verilog-libname NANG45 \
+#   --verilog-design_file ~/refs/hpc2_silver/fin.v \
+#   --verilog-module_name hpc2_top
+[Parse]            43 gate(s) / 50 signal(s)
+probing.standard   (d<=1) -- PASS
+probing.robust     (d<=1) -- PASS
+NI.standard        (d<=1) -- PASS
+NI.robust          (d<=1) -- PASS
+SNI.standard       (d<=1) -- PASS
+SNI.robust         (d<=1) -- FAIL   >> Probes: <out:line42>
+PINI.standard      (d<=1) -- PASS
+PINI.robust        (d<=1) -- PASS

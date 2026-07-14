@@ -1,0 +1,11 @@
+name = "leansec"
+version = "0.1.0"
+defaultTargets = ["LeanSec", "Anchors"]
+
+[[lean_lib]]
+name = "LeanSec"
+
+[[lean_lib]]
+name = "Test"
+srcDir = "test"
+roots = ["Anchors"]

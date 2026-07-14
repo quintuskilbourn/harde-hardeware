@@ -1,0 +1,12 @@
+# SILVER verdict on tools/netlist2lean/netlists/dom_and.v (NANG45, module dom_and, d<=1)
+# Reproduce: bash tools/netlist2lean/gen_dom_silver.sh on the EDA box (see header).
+# Generated 2026-07-13 via yosys synth (abc -g AND,NAND,OR,NOR,XOR,XNOR) + SILVER ./bin/verify.
+[Parse]            23 gate(s) / 26 signal(s)
+probing.standard   (d<=1) -- PASS
+probing.robust     (d<=1) -- PASS
+NI.standard        (d<=1) -- PASS
+NI.robust          (d<=1) -- PASS
+SNI.standard       (d<=1) -- PASS
+SNI.robust         (d<=1) -- FAIL   >> Probes: <out:line22>
+PINI.standard      (d<=1) -- FAIL   >> Probes: <nand:line6>
+PINI.robust        (d<=1) -- FAIL   >> Probes: <reg:line16>
