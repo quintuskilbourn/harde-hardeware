@@ -1004,18 +1004,39 @@ def emit_witness_lean(built, module, circuit_namespace, witness_namespace):
     L("    step := ?_ }")
     L("  intro index gate hgate")
     L("  exact match index with")
+    # Fully concretizing frontier proof.  Used for the shapes on which the
+    # single-spine `rw` walk is unsound as a tactic strategy: consumed-QN
+    # root aliases (two frontier layers), BUF (the atomic side needs
+    # `(x ++ x).eraseDups = x.eraseDups`, which only holds after
+    # concretization), and OR/NOR expansions (their primitive trees have
+    # SIBLING branches, and `rw [orderedFrontier]` only unfolds the leftmost
+    # occurrence, walking one spine and leaving the sibling folded — a latent
+    # bug flushed out by the first netlist to exercise these cells,
+    # tools/netlist2lean/netlists/xor_refresh.v).  The `repeat` unfolds every
+    # `orderedFrontier` occurrence on both sides to literal lists and `decide`
+    # closes the residual concrete equality.
+    def concretized_frontier_proof(circuit_name, close=")"):
+        L("        (by")
+        L(f"          repeat (rw [orderedFrontier]; try simp [{circuit_name}, "
+          "SupportedCombCell.function])")
+        L(f"          all_goals decide{close}")
+
     for index, step in enumerate(steps):
         L(f"  | {index} => by")
         L("      simp [parsedOutputs] at hgate")
         L("      subst gate")
         if step.kind == "root":
             L(f"      exact .root {step.frontier_root}")
-            L("        (by")
-            L("          rw [orderedFrontier]")
-            L(f"          simp [{circuit_namespace}.circuit])")
-            L("        (by")
-            L("          rw [orderedFrontier]")
-            L("          simp [atomicCircuit])")
+            if step.frontier_root != step.gate:
+                concretized_frontier_proof(f"{circuit_namespace}.circuit")
+                concretized_frontier_proof("atomicCircuit")
+            else:
+                L("        (by")
+                L("          rw [orderedFrontier]")
+                L(f"          simp [{circuit_namespace}.circuit])")
+                L("        (by")
+                L("          rw [orderedFrontier]")
+                L("          simp [atomicCircuit])")
         elif step.kind == "combinational":
             drivers = list(step.input_gates)
             if len(drivers) == 1:
@@ -1029,25 +1050,29 @@ def emit_witness_lean(built, module, circuit_namespace, witness_namespace):
             L("        (by unfold parsedOutputs; decide)")
             L("        (by unfold parsedOutputs; decide)")
             func = CELLS[step.celltype][0]
-            expansion_depth = {
-                "not": 1, "buf": 1, "and": 1, "xor": 1,
-                "nand": 2, "xnor": 2, "nor": 3, "or": 4,
-            }[func]
-            L("        (by")
-            for depth in range(expansion_depth):
-                L("          rw [orderedFrontier]")
-                if depth + 1 < expansion_depth:
-                    L(f"          simp [{circuit_namespace}.circuit]")
-                else:
-                    if expansion_depth == 1:
-                        L(f"          simp [{circuit_namespace}.circuit,")
-                        L("            SupportedCombCell.function])")
+            if func in ("or", "nor", "buf"):
+                concretized_frontier_proof(f"{circuit_namespace}.circuit")
+                concretized_frontier_proof("atomicCircuit")
+            else:
+                expansion_depth = {
+                    "not": 1, "and": 1, "xor": 1,
+                    "nand": 2, "xnor": 2,
+                }[func]
+                L("        (by")
+                for depth in range(expansion_depth):
+                    L("          rw [orderedFrontier]")
+                    if depth + 1 < expansion_depth:
+                        L(f"          simp [{circuit_namespace}.circuit]")
                     else:
-                        L("          simp [SupportedCombCell.function])")
-            L("        (by")
-            L("          rw [orderedFrontier]")
-            L("          simp [atomicCircuit,")
-            L("            SupportedCombCell.function])")
+                        if expansion_depth == 1:
+                            L(f"          simp [{circuit_namespace}.circuit,")
+                            L("            SupportedCombCell.function])")
+                        else:
+                            L("          simp [SupportedCombCell.function])")
+                L("        (by")
+                L("          rw [orderedFrontier]")
+                L("          simp [atomicCircuit,")
+                L("            SupportedCombCell.function])")
         else:
             se_gate, d_gate, si_gate = step.input_gates
             se_index = output_index[se_gate]

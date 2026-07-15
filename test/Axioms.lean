@@ -4,6 +4,10 @@ import LeanSec.Expansion
 import LeanSec.Gadget
 import LeanSec.Gadgets.TransitionLeak
 import Anchors
+import LeanSec.Composition.OPINIRealWork
+import LeanSec.Netlist.XorRefreshAnchors
+import LeanSec.Netlist.ParserWitnessXorRefresh
+import LeanSec.Checker.Differential
 
 namespace LeanSec.Circuit.Tests
 
@@ -251,3 +255,40 @@ end LeanSec.Expansion.Tests
 #print axioms LeanSec.Gadgets.OPINI2.Chains.serial_hpc2_wf
 #print axioms LeanSec.Gadgets.OPINI2.Chains.serial_opini2_wf
 #print axioms LeanSec.Gadgets.OPINI2.Chains.parallel_hpc2_wf
+
+/- 2026-07-15 hardening (H1/H2/H4): non-degenerate O-PINI reconvergent
+instance, fresh-netlist parser witness, checker differential battery. -/
+
+#print axioms LeanSec.Composition.OPINIRealWork.realWork_wf
+#print axioms LeanSec.Composition.OPINIRealWork.realWork_fanout
+#print axioms LeanSec.Composition.OPINIRealWork.realWork_opini
+#print axioms LeanSec.Composition.OPINIRealWork.realComposite_build
+#print axioms LeanSec.Composition.OPINIRealWork.realWork_composite_opini
+#print axioms LeanSec.Composition.OPINIRealWork.realWork_composite_pini
+#print axioms LeanSec.Composition.OPINIRealWork.realWork_composite_probing
+#print axioms LeanSec.Composition.OPINIRealWork.realComposite_g_eq
+#print axioms LeanSec.Composition.OPINIRealWork.boundary_registers_latch_producer
+#print axioms LeanSec.Composition.OPINIRealWork.producer_reused_by_three_consumers
+#print axioms LeanSec.Composition.OPINIRealWork.outputs_reconverge
+#print axioms LeanSec.Composition.OPINIRealWork.realWork_recombines
+#print axioms LeanSec.Composition.OPINIRealWork.forkJoin_branch_degenerate
+#print axioms LeanSec.Composition.OPINIRealWork.realWork_gates_nonconstant
+#print axioms LeanSec.Composition.OPINIRealWork.realWork_branches_distinct
+#print axioms LeanSec.Netlist.XorRefreshGen.circuit_wf
+#print axioms LeanSec.Netlist.XorRefreshGen.recombines
+#print axioms LeanSec.Netlist.XorRefreshGen.glitch_probing_one
+#print axioms LeanSec.Netlist.ParserWitnessXorRefresh.supportedCellExpansion
+#print axioms LeanSec.Netlist.ParserWitnessXorRefresh.parsedOutputs_frontier_refinement
+#print axioms LeanSec.Checker.Differential.accepts_dom_and
+#print axioms LeanSec.Checker.Differential.accepts_xor_refresh
+#print axioms LeanSec.Checker.Differential.accepts_serial2_composite
+#print axioms LeanSec.Checker.Differential.accepts_leaky_glitch_only
+#print axioms LeanSec.Checker.Differential.accepts_real_work_tail
+#print axioms LeanSec.Checker.Differential.rejects_xbr
+#print axioms LeanSec.Checker.Differential.rejects_naive_and
+#print axioms LeanSec.Checker.Differential.rejects_transition_leak
+#print axioms LeanSec.Checker.Differential.shareCollapse_recombines
+#print axioms LeanSec.Checker.Differential.shareCollapse_not_probing
+#print axioms LeanSec.Checker.Differential.rejects_share_collapse
+#print axioms LeanSec.Checker.Differential.rejects_share_collapse_transition
+#print axioms LeanSec.Checker.Differential.checker_route_real_work_tail

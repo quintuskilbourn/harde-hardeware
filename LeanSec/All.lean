@@ -20,6 +20,16 @@ import LeanSec.Composition.DAGAudit
 import LeanSec.Composition.OPINIClosureAudit
 import LeanSec.Composition.OPINIReuse
 import LeanSec.Composition.OPINIFixpointAudit
+import LeanSec.Composition.OPINIReuse2
+import LeanSec.Composition.UniformOPINIFalsify
+import LeanSec.Composition.OPINIReuse2Audit
+import LeanSec.Checker.Bitslice
+import LeanSec.Gadgets.FullAdder
+import LeanSec.Gadgets.FullAdderCompositionWall
+import LeanSec.Checker.Differential
+import LeanSec.Composition.OPINIRealWork
+import LeanSec.Netlist.ParserWitnessXorRefresh
+import LeanSec.Netlist.XorRefreshAnchors
 /-! Full-verification aggregator for the 2026-07-13 fleet result modules.
 `lake build LeanSec.All` re-checks them all. Heavy box-only decides
 (Checker.HPC2SplitDemo / HPC2Probes* / RawHPC2Benchmark) are excluded. -/
