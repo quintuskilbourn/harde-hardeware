@@ -1,0 +1,22 @@
+import LeanSec.Netlist.ScanCellRefinement
+
+open LeanSec.Netlist.ScanCellRefinement
+
+#print axioms scan_dff_circuit_wf
+#print axioms supported_scan_name_roundtrip
+#print axioms supported_scan_lookup_rejects_dff
+#print axioms supported_dff_lookup_rejects_scan
+#print axioms scan_combinational_function
+#print axioms scan_q_function
+#print axioms scan_combinational_frontier_step
+#print axioms scanMuxFrontier_includes_si
+#print axioms scan_combinational_frontier_substitution
+#print axioms scan_combinational_frontier
+#print axioms scan_q_frontier
+#print axioms supported_scan_frontier_includes_si
+#print axioms supported_scan_mux_observable
+#print axioms idealDff_frontier_ssubset_scanAware
+#print axioms idealDff_observable_frontier_ssubset_scanAware
+#print axioms scanInput_missed_by_idealDff
+#print axioms scanInput_transitionGlitch_missed_by_idealDff
+#print axioms idealDff_disagrees_in_scan_mode

@@ -10,6 +10,14 @@ import LeanSec.Composition.ConcreteSerial2
 import LeanSec.Composition.GenericSerial2
 import LeanSec.Checker.Fast
 import LeanSec.Gadgets.Fig4a
+import LeanSec.Netlist.ScanCellRefinement
+import LeanSec.Netlist.ParserWitnessScanDff
+import LeanSec.Fault.SifaAnchor
+import LeanSec.Fault.SifaDataAnchor
+
+import LeanSec.Composition.ConcreteTree
+import LeanSec.Composition.DAGAudit
+import LeanSec.Composition.OPINIClosureAudit
 /-! Full-verification aggregator for the 2026-07-13 fleet result modules.
 `lake build LeanSec.All` re-checks them all. Heavy box-only decides
 (Checker.HPC2SplitDemo / HPC2Probes* / RawHPC2Benchmark) are excluded. -/

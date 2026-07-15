@@ -1,0 +1,19 @@
+import LeanSec.Netlist.ParserWitnessScanDff
+
+open LeanSec.Netlist.ScanCellRefinement
+open LeanSec.Netlist.ScanParserWitness
+open LeanSec.Netlist.ScanDffWitnessGen
+open LeanSec.Netlist.ParserWitnessScanDff
+
+#print axioms supported_dff_lookup_rejects_scan
+#print axioms supportedScanCellExpansion_outputLocalRefinement
+#print axioms parser_scan_wholeCircuit_frontier_refinement
+#print axioms supportedCellExpansion
+#print axioms parsedOutputs_frontier_refinement
+#print axioms emitted_sdff_shape
+#print axioms emitted_sdff_combinational_function
+#print axioms emitted_sdff_q_function
+#print axioms emitted_sdff_mux_frontier_matches_scanDffCircuit
+#print axioms emitted_scanInput_in_frontier
+#print axioms emitted_sdff_member_policy
+#print axioms emitted_sdff_matches_scanDffCircuit

@@ -15,7 +15,7 @@ transcription, not the hardware.  This tool closes that gap MECHANICALLY:
     auditable parser and (b) the verdict.
 
 This tool is UNTRUSTED.  Its job is to be small and auditable enough that a human
-(and an independent reviewer) can confirm it drops/rewires NO gate.  A parser that produces
+(and codex-verify) can confirm it drops/rewires NO gate.  A parser that produces
 a circuit that "verifies" but does not match the netlist is exactly the hollow
 result the leansec project exists to prevent — so faithfulness, not cleverness,
 is the whole design goal.
@@ -44,6 +44,7 @@ are EXPANDED into latency-0 primitive trees):
                                nor(a,b)=.and(.not a,.not b)          [3 gates]
     OR2  (A1 A2->ZN/Y)      -> or(a,b)=.not(.and(.not a,.not b))      [4 gates]
     DFF  (D,CK->Q[,QN])     -> .reg (latency-1 D input); QN = .not(reg) if used
+    SDFF (D,SE,SI,CK->Q)    -> .reg(.mux(SE,D,SI)); both mux and Q are members
     const 1'b0/1'h0         -> .const false ;  1'b1/1'h1 -> .const true
 
 By default, only each source/standard-cell output is a member (eligible probe).
@@ -148,6 +149,26 @@ DFF_CELLS = {
     "DFF":    {"D": "D", "CK": "C",  "Q": "Q", "QN": None},
 }
 
+# Scan sequential cells are deliberately disjoint from DFF_CELLS.  They must
+# never reach the ordinary-DFF expansion, which would silently discard SE/SI.
+# The generic alias follows DFF's C clock spelling; Nangate-style aliases use
+# CK.  QN is supported for X1/X2 and emitted as .not(Q) when consumed.
+SCAN_DFF_CELLS = {
+    "SDFF_X1": {"D": "D", "SE": "SE", "SI": "SI", "CK": "CK",
+                 "Q": "Q", "QN": "QN"},
+    "SDFF_X2": {"D": "D", "SE": "SE", "SI": "SI", "CK": "CK",
+                 "Q": "Q", "QN": "QN"},
+    "SDFF":    {"D": "D", "SE": "SE", "SI": "SI", "CK": "C",
+                 "Q": "Q", "QN": None},
+}
+if not set(DFF_CELLS).isdisjoint(SCAN_DFF_CELLS):
+    raise RuntimeError("ordinary and scan DFF tables must be disjoint")
+SCAN_DFF_LEAN_CTORS = {
+    "SDFF_X1": "sdffX1", "SDFF_X2": "sdffX2", "SDFF": "sdff",
+}
+if set(SCAN_DFF_LEAN_CTORS) != set(SCAN_DFF_CELLS):
+    raise RuntimeError("SCAN_DFF_LEAN_CTORS must cover exactly scan DFFs")
+
 
 def die(msg):
     sys.stderr.write("netlist2lean: FATAL: " + msg + "\n")
@@ -242,7 +263,7 @@ def parse_netlist(text, module_name):
     # An instance:  CELLTYPE  INSTNAME ( ... ) ;
     # Cell/inst names are ordinary identifiers; the connection list is inside the
     # outermost ( ... ).  We match cell types we know so we never mis-scan.
-    known = set(CELLS) | set(DFF_CELLS)
+    known = set(CELLS) | set(DFF_CELLS) | set(SCAN_DFF_CELLS)
     for m in re.finditer(
         r"\b([A-Za-z_][A-Za-z0-9_]*)\s+(\\?\S+|\w+)\s*\((.*?)\)\s*;",
         mbody, flags=re.S,
@@ -265,9 +286,14 @@ def parse_netlist(text, module_name):
             _, input_pins, output_pin = CELLS[celltype]
             required = set(input_pins) | {output_pin}
             allowed = required
-        else:
+        elif celltype in DFF_CELLS:
             pins = DFF_CELLS[celltype]
             required = {pins["D"], pins["CK"], pins["Q"]}
+            allowed = required | ({pins["QN"]} if pins.get("QN") else set())
+        else:
+            pins = SCAN_DFF_CELLS[celltype]
+            required = {pins["D"], pins["SE"], pins["SI"], pins["CK"],
+                        pins["Q"]}
             allowed = required | ({pins["QN"]} if pins.get("QN") else set())
         missing = required - set(conns)
         extra = set(conns) - allowed
@@ -325,7 +351,7 @@ class LeanGate:
 class WitnessStep:
     """One ordered output in the Lean `SupportedCellExpansion` certificate."""
     gate: int
-    kind: str                     # "root" | "combinational"
+    kind: str                     # "root" | "combinational" | "scan"
     frontier_root: int | None = None
     celltype: str | None = None
     input_gates: list = field(default_factory=list)
@@ -367,6 +393,14 @@ def build(nl):
     clock_nets = set()
     d = None
 
+    # An unannotated primary net used directly as a scan-enable pin is public
+    # control, not fresh randomness.  Derived SE nets retain their real driver.
+    scan_enable_nets = {
+        inst.conns[SCAN_DFF_CELLS[inst.celltype]["SE"]]
+        for inst in nl.insts if inst.celltype in SCAN_DFF_CELLS
+    }
+    control_ids = {}
+    next_control = 0
     next_rnd = 0
     for p in nl.ports:
         if p.silver is None:
@@ -374,8 +408,12 @@ def build(nl):
             # convention, fresh randomness; on an output it is a plain output.
             if p.direction == "input":
                 for net in bus_bits(p):
-                    rnd_ids[net] = next_rnd
-                    next_rnd += 1
+                    if net in scan_enable_nets:
+                        control_ids[net] = next_control
+                        next_control += 1
+                    else:
+                        rnd_ids[net] = next_rnd
+                        next_rnd += 1
             continue
         s = p.silver.strip()
         if s == "clock":
@@ -442,8 +480,13 @@ def build(nl):
     for inst in nl.insts:
         if inst.celltype in CELLS:
             output_pins = [CELLS[inst.celltype][2]]
-        else:
+        elif inst.celltype in DFF_CELLS:
             pins = DFF_CELLS[inst.celltype]
+            output_pins = [pins["Q"]]
+            if pins.get("QN") and pins["QN"] in inst.conns:
+                output_pins.append(pins["QN"])
+        else:
+            pins = SCAN_DFF_CELLS[inst.celltype]
             output_pins = [pins["Q"]]
             if pins.get("QN") and pins["QN"] in inst.conns:
                 output_pins.append(pins["QN"])
@@ -463,6 +506,10 @@ def build(nl):
         idx = emit(f".rnd {rid}", label=f"{net} = rnd {rid}")
         net_out[net] = idx
         witness_root(idx, label=f"randomness {net}")
+    for net, cid in control_ids.items():
+        idx = emit(f".ctl {cid}", label=f"{net} = ctl {cid}")
+        net_out[net] = idx
+        witness_root(idx, label=f"control {net}")
 
     # ---- constants (created lazily on demand) -------------------------------
     const_gate = {}
@@ -483,19 +530,28 @@ def build(nl):
         return net_out[tok]
 
     # ---- pass A: reserve reg gates + QN nots (may be referenced early) -------
-    regs = []   # (reg_idx, D net, celltype)
+    regs = []   # (reg_idx, sampled-data net, instance)
+    scan_regs = []  # (reg_idx, instance); mux inputs are patched after comb pass
     for inst in nl.insts:
-        if inst.celltype not in DFF_CELLS:
+        if inst.celltype not in DFF_CELLS and inst.celltype not in SCAN_DFF_CELLS:
             continue
-        pins = DFF_CELLS[inst.celltype]
+        is_scan = inst.celltype in SCAN_DFF_CELLS
+        pins = (SCAN_DFF_CELLS[inst.celltype] if is_scan
+                else DFF_CELLS[inst.celltype])
         qnet = inst.conns[pins["Q"]]
         dnet = inst.conns[pins["D"]]
         cknet = inst.conns[pins["CK"]]
         if cknet not in clock_nets:
-            die(f"DFF {inst.name}: clock net {cknet!r} is not SILVER-annotated clock")
-        reg_idx = emit(".reg", inputs=[(0, 1)], label=f"reg <- {dnet}")  # D patched later
+            die(f"{inst.celltype} {inst.name}: clock net {cknet!r} is not "
+                "SILVER-annotated clock")
+        sampled = f"mux({inst.conns[pins['SE']]}, {dnet}, " \
+                  f"{inst.conns[pins['SI']]})" if is_scan else dnet
+        reg_idx = emit(".reg", inputs=[(0, 1)], label=f"reg <- {sampled}")
         net_out[qnet] = reg_idx
-        regs.append((reg_idx, dnet, inst))
+        if is_scan:
+            scan_regs.append((reg_idx, inst))
+        else:
+            regs.append((reg_idx, dnet, inst))
         witness_root(reg_idx, label=f"{inst.name}.Q")
         # QN: only materialize if the net is actually consumed somewhere.
         qn_pin = pins.get("QN")
@@ -507,7 +563,8 @@ def build(nl):
                 witness_root(not_idx, frontier_root=reg_idx,
                              label=f"{inst.name}.QN")
             else:
-                warnings.append(f"dropped unused QN net {qnn!r} of DFF {inst.name} "
+                warnings.append(f"dropped unused QN net {qnn!r} of "
+                                f"{inst.celltype} {inst.name} "
                                 f"(no fanout; unobservable duplicate of reg value)")
 
     # ---- pass B: combinational cells in topological order --------------------
@@ -531,6 +588,22 @@ def build(nl):
             gate=out_idx, kind="combinational", celltype=inst.celltype,
             input_gates=list(in_idx), label=inst.name))
 
+    # ---- pass C: scan sampled-data muxes ------------------------------------
+    # Q roots were reserved above so sequential feedback is resolvable.  The
+    # muxes are emitted only after ordinary combinational drivers, keeping every
+    # latency-zero mux input earlier than the mux for ZeroOrdered witnesses.
+    for reg_idx, inst in scan_regs:
+        pins = SCAN_DFF_CELLS[inst.celltype]
+        se_idx = net_index(inst.conns[pins["SE"]])
+        d_idx = net_index(inst.conns[pins["D"]])
+        si_idx = net_index(inst.conns[pins["SI"]])
+        mux_idx = emit(".mux", [(se_idx, 0), (d_idx, 0), (si_idx, 0)],
+                       label=f"scan mux of {inst.name}")
+        gates[reg_idx].inputs = [(mux_idx, 1)]
+        witness_steps.append(WitnessStep(
+            gate=mux_idx, kind="scan", celltype=inst.celltype,
+            input_gates=[se_idx, d_idx, si_idx], label=inst.name))
+
     # ---- patch reg D inputs -------------------------------------------------
     for reg_idx, dnet, inst in regs:
         gates[reg_idx].inputs = [(net_index(dnet), 1)]
@@ -538,7 +611,7 @@ def build(nl):
     return {
         "gates": gates, "net_out": net_out, "input_sharings": input_sharings,
         "output_map": output_map, "rnd_ids": rnd_ids, "d": d,
-        "inp_gate": inp_gate, "warnings": warnings,
+        "inp_gate": inp_gate, "control_ids": control_ids, "warnings": warnings,
         "witness_steps": witness_steps,
     }
 
@@ -554,8 +627,10 @@ def net_consumed(nl, net):
         out_pins = set()
         if inst.celltype in CELLS:
             out_pins = {CELLS[inst.celltype][2]}
-        elif inst.celltype in DFF_CELLS:
-            pins = DFF_CELLS[inst.celltype]
+        elif inst.celltype in DFF_CELLS or inst.celltype in SCAN_DFF_CELLS:
+            pins = (DFF_CELLS[inst.celltype]
+                    if inst.celltype in DFF_CELLS
+                    else SCAN_DFF_CELLS[inst.celltype])
             out_pins = {pins["Q"], pins.get("QN")}
         for pin, tok in inst.conns.items():
             if pin in out_pins:
@@ -678,6 +753,11 @@ def validate_schedule(gates):
     """
     for dst, gate in enumerate(gates):
         for src, latency in gate.inputs:
+            # Public controls are evaluated at the consumer cycle and may be
+            # reused across cycles.  Unlike inp/rnd, they have no single
+            # declared arrival that must equal the consumer schedule.
+            if gates[src].kind.startswith(".ctl"):
+                continue
             expected = gates[src].cyc + latency
             if gate.cyc != expected:
                 die(f"schedule mismatch on edge {src}->{dst}: source cycle "
@@ -765,12 +845,17 @@ def emit_lean(built, cyc, module, namespace, horizon_override, input_arrivals,
         gi = built["net_out"][net]
         out_nodes.append((share, gi, gates[gi].cyc))
     L("    output := fun share =>")
-    for k, (share, gi, oc) in enumerate(out_nodes):
-        kw = "if" if k == 0 else "      else if"
-        if k < len(out_nodes) - 1:
-            L(f"      {kw} share == {share} then {{ gate := {gi}, cycle := {oc} }}")
-        else:
-            L(f"      else {{ gate := {gi}, cycle := {oc} }}")
+    if len(out_nodes) == 1:
+        _share, gi, oc = out_nodes[0]
+        L(f"      {{ gate := {gi}, cycle := {oc} }}")
+    else:
+        for k, (share, gi, oc) in enumerate(out_nodes):
+            kw = "if" if k == 0 else "      else if"
+            if k < len(out_nodes) - 1:
+                L(f"      {kw} share == {share} then "
+                  f"{{ gate := {gi}, cycle := {oc} }}")
+            else:
+                L(f"      else {{ gate := {gi}, cycle := {oc} }}")
     L("    member := member")
     # randomness: each rnd id at each cycle in [0, horizon)
     rset = sorted(set(rnd_ids.values()))
@@ -807,15 +892,19 @@ def atomic_gates_for_witness(built):
                     label=f"root alias: {step.label}")
             continue
 
-        func = CELLS[step.celltype][0]
         inputs = step.input_gates
-        if func == "not":
-            kind, atomic_inputs = ".not", [(inputs[0], 0)]
-        elif func == "buf":
-            kind, atomic_inputs = ".and", [(inputs[0], 0), (inputs[0], 0)]
+        if step.kind == "scan":
+            kind = ".mux"
+            atomic_inputs = [(inputs[0], 0), (inputs[1], 0), (inputs[2], 0)]
         else:
-            kind = ".and"
-            atomic_inputs = [(inputs[0], 0), (inputs[1], 0)]
+            func = CELLS[step.celltype][0]
+            if func == "not":
+                kind, atomic_inputs = ".not", [(inputs[0], 0)]
+            elif func == "buf":
+                kind, atomic_inputs = ".and", [(inputs[0], 0), (inputs[0], 0)]
+            else:
+                kind = ".and"
+                atomic_inputs = [(inputs[0], 0), (inputs[1], 0)]
         atomic[step.gate] = LeanGate(
             kind=kind, inputs=atomic_inputs,
             label=f"atomic {step.celltype}: {step.label}")
@@ -837,11 +926,14 @@ def emit_witness_lean(built, module, circuit_namespace, witness_namespace):
     if len(output_index) != len(outputs):
         die("internal witness error: duplicate root/cell-output gate")
 
+    has_scan = any(step.kind == "scan" for step in steps)
     for index, step in enumerate(steps):
-        if step.kind != "combinational":
+        if step.kind == "root":
             continue
-        if step.celltype not in CELL_LEAN_CTORS:
+        if step.kind == "combinational" and step.celltype not in CELL_LEAN_CTORS:
             die(f"internal witness error: no Lean cell for {step.celltype}")
+        if step.kind == "scan" and step.celltype not in SCAN_DFF_LEAN_CTORS:
+            die(f"internal witness error: no Lean scan cell for {step.celltype}")
         for driver in step.input_gates:
             if driver not in output_index:
                 die(f"witness cell {step.label}: driver gate {driver} is not a "
@@ -854,7 +946,10 @@ def emit_witness_lean(built, module, circuit_namespace, witness_namespace):
     lines = []
     L = lines.append
     L(f"import {circuit_namespace}")
-    L("import LeanSec.Netlist.ParserWitness")
+    if has_scan:
+        L("import LeanSec.Netlist.ScanParserWitness")
+    else:
+        L("import LeanSec.Netlist.ParserWitness")
     L("")
     L(f"/-! GENERATED by tools/netlist2lean/netlist2lean.py from module `{module}`.")
     L("    This module re-validates the generated primitive circuit against the")
@@ -867,6 +962,9 @@ def emit_witness_lean(built, module, circuit_namespace, witness_namespace):
     L("open LeanSec.Netlist.CircuitRefinementGeneric")
     L("open LeanSec.Netlist.CircuitRefinementClosed")
     L("open LeanSec.Netlist.ParserWitness")
+    if has_scan:
+        L("open LeanSec.Netlist.ScanCellRefinement")
+        L("open LeanSec.Netlist.ScanParserWitness")
     L("")
     L("def atomicCircuit : Circuit :=")
     L("  { gates := #[")
@@ -886,7 +984,9 @@ def emit_witness_lean(built, module, circuit_namespace, witness_namespace):
     L("set_option maxHeartbeats 8000000 in")
     L("/-- Kernel-checked re-validation of the generated circuit and cell wiring. -/")
     L("def supportedCellExpansion :")
-    L(f"    SupportedCellExpansion {circuit_namespace}.circuit atomicCircuit := by")
+    construction = ("SupportedScanCellExpansion" if has_scan
+                    else "SupportedCellExpansion")
+    L(f"    {construction} {circuit_namespace}.circuit atomicCircuit := by")
     L("  refine {")
     L("    outputs := parsedOutputs")
     L("    expandedZeroOrdered := zeroOrdered_of_finite (by")
@@ -916,7 +1016,7 @@ def emit_witness_lean(built, module, circuit_namespace, witness_namespace):
             L("        (by")
             L("          rw [orderedFrontier]")
             L("          simp [atomicCircuit])")
-        else:
+        elif step.kind == "combinational":
             drivers = list(step.input_gates)
             if len(drivers) == 1:
                 drivers.append(drivers[0])
@@ -948,6 +1048,25 @@ def emit_witness_lean(built, module, circuit_namespace, witness_namespace):
             L("          rw [orderedFrontier]")
             L("          simp [atomicCircuit,")
             L("            SupportedCombCell.function])")
+        else:
+            se_gate, d_gate, si_gate = step.input_gates
+            se_index = output_index[se_gate]
+            d_index = output_index[d_gate]
+            si_index = output_index[si_gate]
+            ctor = SCAN_DFF_LEAN_CTORS[step.celltype]
+            L(f"      exact .scanMux .{ctor}")
+            L(f"        {se_index} {se_gate} {d_index} {d_gate} "
+              f"{si_index} {si_gate}")
+            L("        (by decide) (by decide) (by decide)")
+            L("        (by unfold parsedOutputs; decide)")
+            L("        (by unfold parsedOutputs; decide)")
+            L("        (by unfold parsedOutputs; decide)")
+            L("        (by")
+            L("          rw [orderedFrontier]")
+            L(f"          simp [{circuit_namespace}.circuit, scanMuxFrontier])")
+            L("        (by")
+            L("          rw [orderedFrontier]")
+            L("          simp [atomicCircuit, scanMuxFrontier])")
     L(f"  | {nat_tail_pattern(len(steps))} => by simp [parsedOutputs] at hgate")
     L("")
     L("/-- The E4 capstone now applies to this exact generated circuit. -/")
@@ -957,7 +1076,9 @@ def emit_witness_lean(built, module, circuit_namespace, witness_namespace):
     L(f"          {circuit_namespace}.circuit.gates.size gate =")
     L("        glitchGates atomicCircuit atomicCircuit.gates.size gate := by")
     L("  simpa only [supportedCellExpansion] using")
-    L("    parser_generic_wholeCircuit_frontier_refinement supportedCellExpansion")
+    capstone = ("parser_scan_wholeCircuit_frontier_refinement" if has_scan
+                else "parser_generic_wholeCircuit_frontier_refinement")
+    L(f"    {capstone} supportedCellExpansion")
     L("")
     L(f"end {witness_namespace}")
     L("")

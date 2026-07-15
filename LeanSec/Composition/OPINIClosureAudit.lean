@@ -1,0 +1,14 @@
+import LeanSec.Composition.OPINIClosure
+
+#print axioms LeanSec.Composition.OPINIPipelineGadget.probing
+#print axioms LeanSec.Composition.OPINIPipelineGadget.ofLeaf
+#print axioms LeanSec.Composition.tailWitness_propagates
+#print axioms LeanSec.Composition.witnessFeedback_not_from_local_bounds
+#print axioms LeanSec.Composition.ConcreteReconvergent.reconvergent_opini
+#print axioms LeanSec.Composition.ConcreteReconvergent.reconvergent_recombines
+#print axioms LeanSec.Composition.ConcreteReconvergent.opiniPipeline
+#print axioms LeanSec.Composition.ConcreteReconvergent.reconvergent_probing
+#print axioms LeanSec.Composition.ConcreteReconvergent.producer_fanout_edges
+#print axioms LeanSec.Composition.ConcreteReconvergent.branches_reconverge
+#print axioms LeanSec.Composition.ConcreteReconvergent.graph_shape
+#print axioms LeanSec.Composition.ConcreteReconvergent.graph_wellFormed
