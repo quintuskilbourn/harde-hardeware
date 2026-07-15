@@ -18,6 +18,8 @@ import LeanSec.Fault.SifaDataAnchor
 import LeanSec.Composition.ConcreteTree
 import LeanSec.Composition.DAGAudit
 import LeanSec.Composition.OPINIClosureAudit
+import LeanSec.Composition.OPINIReuse
+import LeanSec.Composition.OPINIFixpointAudit
 /-! Full-verification aggregator for the 2026-07-13 fleet result modules.
 `lake build LeanSec.All` re-checks them all. Heavy box-only decides
 (Checker.HPC2SplitDemo / HPC2Probes* / RawHPC2Benchmark) are excluded. -/
