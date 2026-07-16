@@ -1,0 +1,27 @@
+===== top_add256_opini2 sub=0  =====
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[2] is not sensitive, while marked as such.
+Warning: output port sum[3] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[2] is not sensitive, while marked as such.
+Warning: output port sum[3] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[2] is not sensitive, while marked as such.
+Warning: output port sum[3] is not sensitive, while marked as such.
+Warning: output port sum[4] is not sensitive, while marked as such.
+MATCHI exit code: 0

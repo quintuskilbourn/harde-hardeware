@@ -1,0 +1,38 @@
+# synth_add256.ys — MATCHI-prep synthesis of the 256-bit masked ripple adder.
+# Mirrors . (the flow that passed the 8-bit
+# top): NO flatten pass is ever run, techmap/abc are per-module, so the
+# MSKand_opini2_d2 gadget survives as a hierarchical instance and its
+# matchi_prop="OPINI"/matchi_strat="assumed" module attributes reach the JSON
+# — MATCHI black-boxes it as the assumed-OPINI leaf. keep_hierarchy is set
+# explicitly on the gadget as belt-and-braces (synth.tcl relies on the
+# absence of flatten alone).
+#
+# Run:  yosys synth_add256.ys   (paths are absolute; cwd-independent)
+# Outputs land next to the sources in this directory.
+
+read_verilog ./MSKand_opini2_d2.v
+read_verilog ./top_add256_opini2.v
+hierarchy -check -top top_add256_opini2
+
+# Never inline the assumed-OPINI leaf.
+setattr -mod -set keep_hierarchy 1 MSKand_opini2_d2
+
+# Remove verilog high-level constructs, in favor of netlists
+proc
+# Map yosys RTL library to yosys Gate library.
+techmap
+# Map gates to the matchi_cells library.
+dfflibmap -liberty .
+abc -liberty .
+clean
+
+# Include the gate library in the netlist (gives cells the correct
+# "port_directions" attribute, same as the 8-bit flow).
+read_verilog .
+proc
+hierarchy -check -top top_add256_opini2
+
+# Outputs: json (for MATCHI analysis) and verilog (for simulation).
+write_json ./top_add256_opini2_synth.json
+write_verilog -norename ./top_add256_opini2_synth.v
+write_verilog -noattr -norename ./top_add256_opini2_synth_noattr.v

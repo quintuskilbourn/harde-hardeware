@@ -15,7 +15,7 @@ Where the host or a co-tenant is the adversary — **confidential MEV block buil
 
 ## The approach
 
-A **masked RISC-V (RV64) processor running a software EVM**, with two pillars:
+A **masked RISC-V (RV64) core that puts an aggressive amount of the EVM in silicon** — a **256-bit-native masked datapath** with dedicated hardware accelerators (256-bit masked ALU including MUL/DIV, a **dedicated masked Keccak unit**, masked storage) — orchestrated by a **software EVM interpreter**. This is deliberately more than a minimal masked coprocessor: the heavy, hot EVM operations are masked *in hardware* at full 256-bit width, and software only stitches them into opcodes. Two pillars:
 
 **Physical pillar — masking.** Every secret is split into random *shares* (`x = x₀ ⊕ x₁`, `x₀` uniform). Each share alone is pure noise, so a power/EM trace of any single wire reveals nothing. The hardware is redesigned so it *never recombines* the shares — it computes on them separately and only ever un-splits the intended output. This is deceptively hard to get right: one mis-placed register or reused random bit can silently re-join the shares and leak everything — which is exactly why the second half of the project is *proving* it.
 

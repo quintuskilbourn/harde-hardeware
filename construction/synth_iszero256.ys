@@ -1,0 +1,31 @@
+# synth_iszero256.ys — MATCHI-prep synthesis of the 256-bit masked ISZERO tree.
+# Direct mirror of ../add256/synth_add256.ys (the flow that passed the 256-bit
+# adder): NO flatten pass is ever run, techmap/abc are per-module, so the
+# MSKand_opini2_d2 gadget survives as a hierarchical instance and its
+# matchi_prop="OPINI"/matchi_strat="assumed" module attributes reach the JSON
+# — MATCHI black-boxes it as the assumed-OPINI leaf. keep_hierarchy is set
+# explicitly on the gadget as belt-and-braces.
+#
+# Run:  yosys synth_iszero256.ys   (paths absolute; cwd-independent)
+# Outputs land next to the sources in this directory.
+
+read_verilog ./MSKand_opini2_d2.v
+read_verilog ./iszero256.v
+hierarchy -check -top iszero256
+
+# Never inline the assumed-OPINI leaf.
+setattr -mod -set keep_hierarchy 1 MSKand_opini2_d2
+
+proc
+techmap
+dfflibmap -liberty .
+abc -liberty .
+clean
+
+read_verilog .
+proc
+hierarchy -check -top iszero256
+
+write_json ./iszero256_synth.json
+write_verilog -norename ./iszero256_synth.v
+write_verilog -noattr -norename ./iszero256_synth_noattr.v

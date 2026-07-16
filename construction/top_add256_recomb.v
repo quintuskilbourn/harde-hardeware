@@ -1,0 +1,4139 @@
+// NEGATIVE CONTROL (must FAIL): identical to top_add256_opini2 plus one
+// share-recombining register in top-level glue (leak <= share0 ^ share1 of sum
+// bit 0). MATCHI must flag the gate sensitive in multiple shares. Mirrors
+// ./top_add8_recomb.v.
+(* matchi_prop = "PINI", matchi_strat = "composite_top", matchi_arch = "loopy", matchi_shares = 2 *)
+module top_add256_recomb (clk, rst, go, sub, a, b, r, s, sum, cout, leak_o);
+(* matchi_type = "clock" *)   input clk;
+(* matchi_type = "control" *) input rst;
+(* matchi_type = "control" *) input go;
+(* matchi_type = "control" *) input sub;
+(* matchi_type = "sharings_dense", matchi_active = "a_act" *) input [511:0] a;
+(* matchi_type = "sharings_dense", matchi_active = "b_act" *) input [511:0] b;
+(* matchi_type = "random", matchi_active = "r_act" *) input [511:0] r;
+(* matchi_type = "random", matchi_active = "s_act" *) input [511:0] s;
+(* matchi_type = "sharings_dense", matchi_active = "out_act" *) output [511:0] sum;
+(* matchi_type = "sharing", matchi_active = "out_act" *) output [1:0] cout;
+(* matchi_type = "control" *) output leak_o;
+
+(* keep *) wire act0 = go;
+(* keep *) reg [1030:1] actr;
+always @(posedge clk) begin
+    if (rst) actr <= 1030'b0;
+    else     actr <= {actr[1029:1], act0};
+end
+wire [1030:0] act = {actr, act0};
+(* keep *) wire b_act   = |act[513:0];
+(* keep *) wire a_act   = |act[514:1];
+(* keep *) wire r_act   = |act[1027:0];
+(* keep *) wire s_act   = |act[1028:1];
+(* keep *) wire out_act = |act[1030:0];
+
+wire [256:0] carry0, carry1;
+assign carry0[0] = sub;
+assign carry1[0] = 1'b0;
+
+// ---- bit 0 ----
+wire b0_eff_0 = b[0] ^ sub;
+wire p0_0 = a[0]   ^ b0_eff_0;
+wire p1_0 = a[1] ^ b[1];
+wire g0_0, g1_0, t0_0, t1_0;
+MSKand_opini2_d2 u_generate_0 (
+    .ina({a[1], a[0]}), .inb({b[1], b0_eff_0}),
+    .rnd(r[0]), .s(s[0]), .clk(clk), .out({g1_0, g0_0}));
+MSKand_opini2_d2 u_propagate_0 (
+    .ina({carry1[0], carry0[0]}), .inb({p1_0, p0_0}),
+    .rnd(r[1]), .s(s[1]), .clk(clk), .out({t1_0, t0_0}));
+assign carry0[1] = g0_0 ^ t0_0;
+assign carry1[1] = g1_0 ^ t1_0;
+assign sum[0]   = p0_0 ^ carry0[0];
+assign sum[1] = p1_0 ^ carry1[0];
+
+// ---- bit 1 ----
+wire b0_eff_1 = b[2] ^ sub;
+wire p0_1 = a[2]   ^ b0_eff_1;
+wire p1_1 = a[3] ^ b[3];
+wire g0_1, g1_1, t0_1, t1_1;
+MSKand_opini2_d2 u_generate_1 (
+    .ina({a[3], a[2]}), .inb({b[3], b0_eff_1}),
+    .rnd(r[2]), .s(s[2]), .clk(clk), .out({g1_1, g0_1}));
+MSKand_opini2_d2 u_propagate_1 (
+    .ina({carry1[1], carry0[1]}), .inb({p1_1, p0_1}),
+    .rnd(r[3]), .s(s[3]), .clk(clk), .out({t1_1, t0_1}));
+assign carry0[2] = g0_1 ^ t0_1;
+assign carry1[2] = g1_1 ^ t1_1;
+assign sum[2]   = p0_1 ^ carry0[1];
+assign sum[3] = p1_1 ^ carry1[1];
+
+// ---- bit 2 ----
+wire b0_eff_2 = b[4] ^ sub;
+wire p0_2 = a[4]   ^ b0_eff_2;
+wire p1_2 = a[5] ^ b[5];
+wire g0_2, g1_2, t0_2, t1_2;
+MSKand_opini2_d2 u_generate_2 (
+    .ina({a[5], a[4]}), .inb({b[5], b0_eff_2}),
+    .rnd(r[4]), .s(s[4]), .clk(clk), .out({g1_2, g0_2}));
+MSKand_opini2_d2 u_propagate_2 (
+    .ina({carry1[2], carry0[2]}), .inb({p1_2, p0_2}),
+    .rnd(r[5]), .s(s[5]), .clk(clk), .out({t1_2, t0_2}));
+assign carry0[3] = g0_2 ^ t0_2;
+assign carry1[3] = g1_2 ^ t1_2;
+assign sum[4]   = p0_2 ^ carry0[2];
+assign sum[5] = p1_2 ^ carry1[2];
+
+// ---- bit 3 ----
+wire b0_eff_3 = b[6] ^ sub;
+wire p0_3 = a[6]   ^ b0_eff_3;
+wire p1_3 = a[7] ^ b[7];
+wire g0_3, g1_3, t0_3, t1_3;
+MSKand_opini2_d2 u_generate_3 (
+    .ina({a[7], a[6]}), .inb({b[7], b0_eff_3}),
+    .rnd(r[6]), .s(s[6]), .clk(clk), .out({g1_3, g0_3}));
+MSKand_opini2_d2 u_propagate_3 (
+    .ina({carry1[3], carry0[3]}), .inb({p1_3, p0_3}),
+    .rnd(r[7]), .s(s[7]), .clk(clk), .out({t1_3, t0_3}));
+assign carry0[4] = g0_3 ^ t0_3;
+assign carry1[4] = g1_3 ^ t1_3;
+assign sum[6]   = p0_3 ^ carry0[3];
+assign sum[7] = p1_3 ^ carry1[3];
+
+// ---- bit 4 ----
+wire b0_eff_4 = b[8] ^ sub;
+wire p0_4 = a[8]   ^ b0_eff_4;
+wire p1_4 = a[9] ^ b[9];
+wire g0_4, g1_4, t0_4, t1_4;
+MSKand_opini2_d2 u_generate_4 (
+    .ina({a[9], a[8]}), .inb({b[9], b0_eff_4}),
+    .rnd(r[8]), .s(s[8]), .clk(clk), .out({g1_4, g0_4}));
+MSKand_opini2_d2 u_propagate_4 (
+    .ina({carry1[4], carry0[4]}), .inb({p1_4, p0_4}),
+    .rnd(r[9]), .s(s[9]), .clk(clk), .out({t1_4, t0_4}));
+assign carry0[5] = g0_4 ^ t0_4;
+assign carry1[5] = g1_4 ^ t1_4;
+assign sum[8]   = p0_4 ^ carry0[4];
+assign sum[9] = p1_4 ^ carry1[4];
+
+// ---- bit 5 ----
+wire b0_eff_5 = b[10] ^ sub;
+wire p0_5 = a[10]   ^ b0_eff_5;
+wire p1_5 = a[11] ^ b[11];
+wire g0_5, g1_5, t0_5, t1_5;
+MSKand_opini2_d2 u_generate_5 (
+    .ina({a[11], a[10]}), .inb({b[11], b0_eff_5}),
+    .rnd(r[10]), .s(s[10]), .clk(clk), .out({g1_5, g0_5}));
+MSKand_opini2_d2 u_propagate_5 (
+    .ina({carry1[5], carry0[5]}), .inb({p1_5, p0_5}),
+    .rnd(r[11]), .s(s[11]), .clk(clk), .out({t1_5, t0_5}));
+assign carry0[6] = g0_5 ^ t0_5;
+assign carry1[6] = g1_5 ^ t1_5;
+assign sum[10]   = p0_5 ^ carry0[5];
+assign sum[11] = p1_5 ^ carry1[5];
+
+// ---- bit 6 ----
+wire b0_eff_6 = b[12] ^ sub;
+wire p0_6 = a[12]   ^ b0_eff_6;
+wire p1_6 = a[13] ^ b[13];
+wire g0_6, g1_6, t0_6, t1_6;
+MSKand_opini2_d2 u_generate_6 (
+    .ina({a[13], a[12]}), .inb({b[13], b0_eff_6}),
+    .rnd(r[12]), .s(s[12]), .clk(clk), .out({g1_6, g0_6}));
+MSKand_opini2_d2 u_propagate_6 (
+    .ina({carry1[6], carry0[6]}), .inb({p1_6, p0_6}),
+    .rnd(r[13]), .s(s[13]), .clk(clk), .out({t1_6, t0_6}));
+assign carry0[7] = g0_6 ^ t0_6;
+assign carry1[7] = g1_6 ^ t1_6;
+assign sum[12]   = p0_6 ^ carry0[6];
+assign sum[13] = p1_6 ^ carry1[6];
+
+// ---- bit 7 ----
+wire b0_eff_7 = b[14] ^ sub;
+wire p0_7 = a[14]   ^ b0_eff_7;
+wire p1_7 = a[15] ^ b[15];
+wire g0_7, g1_7, t0_7, t1_7;
+MSKand_opini2_d2 u_generate_7 (
+    .ina({a[15], a[14]}), .inb({b[15], b0_eff_7}),
+    .rnd(r[14]), .s(s[14]), .clk(clk), .out({g1_7, g0_7}));
+MSKand_opini2_d2 u_propagate_7 (
+    .ina({carry1[7], carry0[7]}), .inb({p1_7, p0_7}),
+    .rnd(r[15]), .s(s[15]), .clk(clk), .out({t1_7, t0_7}));
+assign carry0[8] = g0_7 ^ t0_7;
+assign carry1[8] = g1_7 ^ t1_7;
+assign sum[14]   = p0_7 ^ carry0[7];
+assign sum[15] = p1_7 ^ carry1[7];
+
+// ---- bit 8 ----
+wire b0_eff_8 = b[16] ^ sub;
+wire p0_8 = a[16]   ^ b0_eff_8;
+wire p1_8 = a[17] ^ b[17];
+wire g0_8, g1_8, t0_8, t1_8;
+MSKand_opini2_d2 u_generate_8 (
+    .ina({a[17], a[16]}), .inb({b[17], b0_eff_8}),
+    .rnd(r[16]), .s(s[16]), .clk(clk), .out({g1_8, g0_8}));
+MSKand_opini2_d2 u_propagate_8 (
+    .ina({carry1[8], carry0[8]}), .inb({p1_8, p0_8}),
+    .rnd(r[17]), .s(s[17]), .clk(clk), .out({t1_8, t0_8}));
+assign carry0[9] = g0_8 ^ t0_8;
+assign carry1[9] = g1_8 ^ t1_8;
+assign sum[16]   = p0_8 ^ carry0[8];
+assign sum[17] = p1_8 ^ carry1[8];
+
+// ---- bit 9 ----
+wire b0_eff_9 = b[18] ^ sub;
+wire p0_9 = a[18]   ^ b0_eff_9;
+wire p1_9 = a[19] ^ b[19];
+wire g0_9, g1_9, t0_9, t1_9;
+MSKand_opini2_d2 u_generate_9 (
+    .ina({a[19], a[18]}), .inb({b[19], b0_eff_9}),
+    .rnd(r[18]), .s(s[18]), .clk(clk), .out({g1_9, g0_9}));
+MSKand_opini2_d2 u_propagate_9 (
+    .ina({carry1[9], carry0[9]}), .inb({p1_9, p0_9}),
+    .rnd(r[19]), .s(s[19]), .clk(clk), .out({t1_9, t0_9}));
+assign carry0[10] = g0_9 ^ t0_9;
+assign carry1[10] = g1_9 ^ t1_9;
+assign sum[18]   = p0_9 ^ carry0[9];
+assign sum[19] = p1_9 ^ carry1[9];
+
+// ---- bit 10 ----
+wire b0_eff_10 = b[20] ^ sub;
+wire p0_10 = a[20]   ^ b0_eff_10;
+wire p1_10 = a[21] ^ b[21];
+wire g0_10, g1_10, t0_10, t1_10;
+MSKand_opini2_d2 u_generate_10 (
+    .ina({a[21], a[20]}), .inb({b[21], b0_eff_10}),
+    .rnd(r[20]), .s(s[20]), .clk(clk), .out({g1_10, g0_10}));
+MSKand_opini2_d2 u_propagate_10 (
+    .ina({carry1[10], carry0[10]}), .inb({p1_10, p0_10}),
+    .rnd(r[21]), .s(s[21]), .clk(clk), .out({t1_10, t0_10}));
+assign carry0[11] = g0_10 ^ t0_10;
+assign carry1[11] = g1_10 ^ t1_10;
+assign sum[20]   = p0_10 ^ carry0[10];
+assign sum[21] = p1_10 ^ carry1[10];
+
+// ---- bit 11 ----
+wire b0_eff_11 = b[22] ^ sub;
+wire p0_11 = a[22]   ^ b0_eff_11;
+wire p1_11 = a[23] ^ b[23];
+wire g0_11, g1_11, t0_11, t1_11;
+MSKand_opini2_d2 u_generate_11 (
+    .ina({a[23], a[22]}), .inb({b[23], b0_eff_11}),
+    .rnd(r[22]), .s(s[22]), .clk(clk), .out({g1_11, g0_11}));
+MSKand_opini2_d2 u_propagate_11 (
+    .ina({carry1[11], carry0[11]}), .inb({p1_11, p0_11}),
+    .rnd(r[23]), .s(s[23]), .clk(clk), .out({t1_11, t0_11}));
+assign carry0[12] = g0_11 ^ t0_11;
+assign carry1[12] = g1_11 ^ t1_11;
+assign sum[22]   = p0_11 ^ carry0[11];
+assign sum[23] = p1_11 ^ carry1[11];
+
+// ---- bit 12 ----
+wire b0_eff_12 = b[24] ^ sub;
+wire p0_12 = a[24]   ^ b0_eff_12;
+wire p1_12 = a[25] ^ b[25];
+wire g0_12, g1_12, t0_12, t1_12;
+MSKand_opini2_d2 u_generate_12 (
+    .ina({a[25], a[24]}), .inb({b[25], b0_eff_12}),
+    .rnd(r[24]), .s(s[24]), .clk(clk), .out({g1_12, g0_12}));
+MSKand_opini2_d2 u_propagate_12 (
+    .ina({carry1[12], carry0[12]}), .inb({p1_12, p0_12}),
+    .rnd(r[25]), .s(s[25]), .clk(clk), .out({t1_12, t0_12}));
+assign carry0[13] = g0_12 ^ t0_12;
+assign carry1[13] = g1_12 ^ t1_12;
+assign sum[24]   = p0_12 ^ carry0[12];
+assign sum[25] = p1_12 ^ carry1[12];
+
+// ---- bit 13 ----
+wire b0_eff_13 = b[26] ^ sub;
+wire p0_13 = a[26]   ^ b0_eff_13;
+wire p1_13 = a[27] ^ b[27];
+wire g0_13, g1_13, t0_13, t1_13;
+MSKand_opini2_d2 u_generate_13 (
+    .ina({a[27], a[26]}), .inb({b[27], b0_eff_13}),
+    .rnd(r[26]), .s(s[26]), .clk(clk), .out({g1_13, g0_13}));
+MSKand_opini2_d2 u_propagate_13 (
+    .ina({carry1[13], carry0[13]}), .inb({p1_13, p0_13}),
+    .rnd(r[27]), .s(s[27]), .clk(clk), .out({t1_13, t0_13}));
+assign carry0[14] = g0_13 ^ t0_13;
+assign carry1[14] = g1_13 ^ t1_13;
+assign sum[26]   = p0_13 ^ carry0[13];
+assign sum[27] = p1_13 ^ carry1[13];
+
+// ---- bit 14 ----
+wire b0_eff_14 = b[28] ^ sub;
+wire p0_14 = a[28]   ^ b0_eff_14;
+wire p1_14 = a[29] ^ b[29];
+wire g0_14, g1_14, t0_14, t1_14;
+MSKand_opini2_d2 u_generate_14 (
+    .ina({a[29], a[28]}), .inb({b[29], b0_eff_14}),
+    .rnd(r[28]), .s(s[28]), .clk(clk), .out({g1_14, g0_14}));
+MSKand_opini2_d2 u_propagate_14 (
+    .ina({carry1[14], carry0[14]}), .inb({p1_14, p0_14}),
+    .rnd(r[29]), .s(s[29]), .clk(clk), .out({t1_14, t0_14}));
+assign carry0[15] = g0_14 ^ t0_14;
+assign carry1[15] = g1_14 ^ t1_14;
+assign sum[28]   = p0_14 ^ carry0[14];
+assign sum[29] = p1_14 ^ carry1[14];
+
+// ---- bit 15 ----
+wire b0_eff_15 = b[30] ^ sub;
+wire p0_15 = a[30]   ^ b0_eff_15;
+wire p1_15 = a[31] ^ b[31];
+wire g0_15, g1_15, t0_15, t1_15;
+MSKand_opini2_d2 u_generate_15 (
+    .ina({a[31], a[30]}), .inb({b[31], b0_eff_15}),
+    .rnd(r[30]), .s(s[30]), .clk(clk), .out({g1_15, g0_15}));
+MSKand_opini2_d2 u_propagate_15 (
+    .ina({carry1[15], carry0[15]}), .inb({p1_15, p0_15}),
+    .rnd(r[31]), .s(s[31]), .clk(clk), .out({t1_15, t0_15}));
+assign carry0[16] = g0_15 ^ t0_15;
+assign carry1[16] = g1_15 ^ t1_15;
+assign sum[30]   = p0_15 ^ carry0[15];
+assign sum[31] = p1_15 ^ carry1[15];
+
+// ---- bit 16 ----
+wire b0_eff_16 = b[32] ^ sub;
+wire p0_16 = a[32]   ^ b0_eff_16;
+wire p1_16 = a[33] ^ b[33];
+wire g0_16, g1_16, t0_16, t1_16;
+MSKand_opini2_d2 u_generate_16 (
+    .ina({a[33], a[32]}), .inb({b[33], b0_eff_16}),
+    .rnd(r[32]), .s(s[32]), .clk(clk), .out({g1_16, g0_16}));
+MSKand_opini2_d2 u_propagate_16 (
+    .ina({carry1[16], carry0[16]}), .inb({p1_16, p0_16}),
+    .rnd(r[33]), .s(s[33]), .clk(clk), .out({t1_16, t0_16}));
+assign carry0[17] = g0_16 ^ t0_16;
+assign carry1[17] = g1_16 ^ t1_16;
+assign sum[32]   = p0_16 ^ carry0[16];
+assign sum[33] = p1_16 ^ carry1[16];
+
+// ---- bit 17 ----
+wire b0_eff_17 = b[34] ^ sub;
+wire p0_17 = a[34]   ^ b0_eff_17;
+wire p1_17 = a[35] ^ b[35];
+wire g0_17, g1_17, t0_17, t1_17;
+MSKand_opini2_d2 u_generate_17 (
+    .ina({a[35], a[34]}), .inb({b[35], b0_eff_17}),
+    .rnd(r[34]), .s(s[34]), .clk(clk), .out({g1_17, g0_17}));
+MSKand_opini2_d2 u_propagate_17 (
+    .ina({carry1[17], carry0[17]}), .inb({p1_17, p0_17}),
+    .rnd(r[35]), .s(s[35]), .clk(clk), .out({t1_17, t0_17}));
+assign carry0[18] = g0_17 ^ t0_17;
+assign carry1[18] = g1_17 ^ t1_17;
+assign sum[34]   = p0_17 ^ carry0[17];
+assign sum[35] = p1_17 ^ carry1[17];
+
+// ---- bit 18 ----
+wire b0_eff_18 = b[36] ^ sub;
+wire p0_18 = a[36]   ^ b0_eff_18;
+wire p1_18 = a[37] ^ b[37];
+wire g0_18, g1_18, t0_18, t1_18;
+MSKand_opini2_d2 u_generate_18 (
+    .ina({a[37], a[36]}), .inb({b[37], b0_eff_18}),
+    .rnd(r[36]), .s(s[36]), .clk(clk), .out({g1_18, g0_18}));
+MSKand_opini2_d2 u_propagate_18 (
+    .ina({carry1[18], carry0[18]}), .inb({p1_18, p0_18}),
+    .rnd(r[37]), .s(s[37]), .clk(clk), .out({t1_18, t0_18}));
+assign carry0[19] = g0_18 ^ t0_18;
+assign carry1[19] = g1_18 ^ t1_18;
+assign sum[36]   = p0_18 ^ carry0[18];
+assign sum[37] = p1_18 ^ carry1[18];
+
+// ---- bit 19 ----
+wire b0_eff_19 = b[38] ^ sub;
+wire p0_19 = a[38]   ^ b0_eff_19;
+wire p1_19 = a[39] ^ b[39];
+wire g0_19, g1_19, t0_19, t1_19;
+MSKand_opini2_d2 u_generate_19 (
+    .ina({a[39], a[38]}), .inb({b[39], b0_eff_19}),
+    .rnd(r[38]), .s(s[38]), .clk(clk), .out({g1_19, g0_19}));
+MSKand_opini2_d2 u_propagate_19 (
+    .ina({carry1[19], carry0[19]}), .inb({p1_19, p0_19}),
+    .rnd(r[39]), .s(s[39]), .clk(clk), .out({t1_19, t0_19}));
+assign carry0[20] = g0_19 ^ t0_19;
+assign carry1[20] = g1_19 ^ t1_19;
+assign sum[38]   = p0_19 ^ carry0[19];
+assign sum[39] = p1_19 ^ carry1[19];
+
+// ---- bit 20 ----
+wire b0_eff_20 = b[40] ^ sub;
+wire p0_20 = a[40]   ^ b0_eff_20;
+wire p1_20 = a[41] ^ b[41];
+wire g0_20, g1_20, t0_20, t1_20;
+MSKand_opini2_d2 u_generate_20 (
+    .ina({a[41], a[40]}), .inb({b[41], b0_eff_20}),
+    .rnd(r[40]), .s(s[40]), .clk(clk), .out({g1_20, g0_20}));
+MSKand_opini2_d2 u_propagate_20 (
+    .ina({carry1[20], carry0[20]}), .inb({p1_20, p0_20}),
+    .rnd(r[41]), .s(s[41]), .clk(clk), .out({t1_20, t0_20}));
+assign carry0[21] = g0_20 ^ t0_20;
+assign carry1[21] = g1_20 ^ t1_20;
+assign sum[40]   = p0_20 ^ carry0[20];
+assign sum[41] = p1_20 ^ carry1[20];
+
+// ---- bit 21 ----
+wire b0_eff_21 = b[42] ^ sub;
+wire p0_21 = a[42]   ^ b0_eff_21;
+wire p1_21 = a[43] ^ b[43];
+wire g0_21, g1_21, t0_21, t1_21;
+MSKand_opini2_d2 u_generate_21 (
+    .ina({a[43], a[42]}), .inb({b[43], b0_eff_21}),
+    .rnd(r[42]), .s(s[42]), .clk(clk), .out({g1_21, g0_21}));
+MSKand_opini2_d2 u_propagate_21 (
+    .ina({carry1[21], carry0[21]}), .inb({p1_21, p0_21}),
+    .rnd(r[43]), .s(s[43]), .clk(clk), .out({t1_21, t0_21}));
+assign carry0[22] = g0_21 ^ t0_21;
+assign carry1[22] = g1_21 ^ t1_21;
+assign sum[42]   = p0_21 ^ carry0[21];
+assign sum[43] = p1_21 ^ carry1[21];
+
+// ---- bit 22 ----
+wire b0_eff_22 = b[44] ^ sub;
+wire p0_22 = a[44]   ^ b0_eff_22;
+wire p1_22 = a[45] ^ b[45];
+wire g0_22, g1_22, t0_22, t1_22;
+MSKand_opini2_d2 u_generate_22 (
+    .ina({a[45], a[44]}), .inb({b[45], b0_eff_22}),
+    .rnd(r[44]), .s(s[44]), .clk(clk), .out({g1_22, g0_22}));
+MSKand_opini2_d2 u_propagate_22 (
+    .ina({carry1[22], carry0[22]}), .inb({p1_22, p0_22}),
+    .rnd(r[45]), .s(s[45]), .clk(clk), .out({t1_22, t0_22}));
+assign carry0[23] = g0_22 ^ t0_22;
+assign carry1[23] = g1_22 ^ t1_22;
+assign sum[44]   = p0_22 ^ carry0[22];
+assign sum[45] = p1_22 ^ carry1[22];
+
+// ---- bit 23 ----
+wire b0_eff_23 = b[46] ^ sub;
+wire p0_23 = a[46]   ^ b0_eff_23;
+wire p1_23 = a[47] ^ b[47];
+wire g0_23, g1_23, t0_23, t1_23;
+MSKand_opini2_d2 u_generate_23 (
+    .ina({a[47], a[46]}), .inb({b[47], b0_eff_23}),
+    .rnd(r[46]), .s(s[46]), .clk(clk), .out({g1_23, g0_23}));
+MSKand_opini2_d2 u_propagate_23 (
+    .ina({carry1[23], carry0[23]}), .inb({p1_23, p0_23}),
+    .rnd(r[47]), .s(s[47]), .clk(clk), .out({t1_23, t0_23}));
+assign carry0[24] = g0_23 ^ t0_23;
+assign carry1[24] = g1_23 ^ t1_23;
+assign sum[46]   = p0_23 ^ carry0[23];
+assign sum[47] = p1_23 ^ carry1[23];
+
+// ---- bit 24 ----
+wire b0_eff_24 = b[48] ^ sub;
+wire p0_24 = a[48]   ^ b0_eff_24;
+wire p1_24 = a[49] ^ b[49];
+wire g0_24, g1_24, t0_24, t1_24;
+MSKand_opini2_d2 u_generate_24 (
+    .ina({a[49], a[48]}), .inb({b[49], b0_eff_24}),
+    .rnd(r[48]), .s(s[48]), .clk(clk), .out({g1_24, g0_24}));
+MSKand_opini2_d2 u_propagate_24 (
+    .ina({carry1[24], carry0[24]}), .inb({p1_24, p0_24}),
+    .rnd(r[49]), .s(s[49]), .clk(clk), .out({t1_24, t0_24}));
+assign carry0[25] = g0_24 ^ t0_24;
+assign carry1[25] = g1_24 ^ t1_24;
+assign sum[48]   = p0_24 ^ carry0[24];
+assign sum[49] = p1_24 ^ carry1[24];
+
+// ---- bit 25 ----
+wire b0_eff_25 = b[50] ^ sub;
+wire p0_25 = a[50]   ^ b0_eff_25;
+wire p1_25 = a[51] ^ b[51];
+wire g0_25, g1_25, t0_25, t1_25;
+MSKand_opini2_d2 u_generate_25 (
+    .ina({a[51], a[50]}), .inb({b[51], b0_eff_25}),
+    .rnd(r[50]), .s(s[50]), .clk(clk), .out({g1_25, g0_25}));
+MSKand_opini2_d2 u_propagate_25 (
+    .ina({carry1[25], carry0[25]}), .inb({p1_25, p0_25}),
+    .rnd(r[51]), .s(s[51]), .clk(clk), .out({t1_25, t0_25}));
+assign carry0[26] = g0_25 ^ t0_25;
+assign carry1[26] = g1_25 ^ t1_25;
+assign sum[50]   = p0_25 ^ carry0[25];
+assign sum[51] = p1_25 ^ carry1[25];
+
+// ---- bit 26 ----
+wire b0_eff_26 = b[52] ^ sub;
+wire p0_26 = a[52]   ^ b0_eff_26;
+wire p1_26 = a[53] ^ b[53];
+wire g0_26, g1_26, t0_26, t1_26;
+MSKand_opini2_d2 u_generate_26 (
+    .ina({a[53], a[52]}), .inb({b[53], b0_eff_26}),
+    .rnd(r[52]), .s(s[52]), .clk(clk), .out({g1_26, g0_26}));
+MSKand_opini2_d2 u_propagate_26 (
+    .ina({carry1[26], carry0[26]}), .inb({p1_26, p0_26}),
+    .rnd(r[53]), .s(s[53]), .clk(clk), .out({t1_26, t0_26}));
+assign carry0[27] = g0_26 ^ t0_26;
+assign carry1[27] = g1_26 ^ t1_26;
+assign sum[52]   = p0_26 ^ carry0[26];
+assign sum[53] = p1_26 ^ carry1[26];
+
+// ---- bit 27 ----
+wire b0_eff_27 = b[54] ^ sub;
+wire p0_27 = a[54]   ^ b0_eff_27;
+wire p1_27 = a[55] ^ b[55];
+wire g0_27, g1_27, t0_27, t1_27;
+MSKand_opini2_d2 u_generate_27 (
+    .ina({a[55], a[54]}), .inb({b[55], b0_eff_27}),
+    .rnd(r[54]), .s(s[54]), .clk(clk), .out({g1_27, g0_27}));
+MSKand_opini2_d2 u_propagate_27 (
+    .ina({carry1[27], carry0[27]}), .inb({p1_27, p0_27}),
+    .rnd(r[55]), .s(s[55]), .clk(clk), .out({t1_27, t0_27}));
+assign carry0[28] = g0_27 ^ t0_27;
+assign carry1[28] = g1_27 ^ t1_27;
+assign sum[54]   = p0_27 ^ carry0[27];
+assign sum[55] = p1_27 ^ carry1[27];
+
+// ---- bit 28 ----
+wire b0_eff_28 = b[56] ^ sub;
+wire p0_28 = a[56]   ^ b0_eff_28;
+wire p1_28 = a[57] ^ b[57];
+wire g0_28, g1_28, t0_28, t1_28;
+MSKand_opini2_d2 u_generate_28 (
+    .ina({a[57], a[56]}), .inb({b[57], b0_eff_28}),
+    .rnd(r[56]), .s(s[56]), .clk(clk), .out({g1_28, g0_28}));
+MSKand_opini2_d2 u_propagate_28 (
+    .ina({carry1[28], carry0[28]}), .inb({p1_28, p0_28}),
+    .rnd(r[57]), .s(s[57]), .clk(clk), .out({t1_28, t0_28}));
+assign carry0[29] = g0_28 ^ t0_28;
+assign carry1[29] = g1_28 ^ t1_28;
+assign sum[56]   = p0_28 ^ carry0[28];
+assign sum[57] = p1_28 ^ carry1[28];
+
+// ---- bit 29 ----
+wire b0_eff_29 = b[58] ^ sub;
+wire p0_29 = a[58]   ^ b0_eff_29;
+wire p1_29 = a[59] ^ b[59];
+wire g0_29, g1_29, t0_29, t1_29;
+MSKand_opini2_d2 u_generate_29 (
+    .ina({a[59], a[58]}), .inb({b[59], b0_eff_29}),
+    .rnd(r[58]), .s(s[58]), .clk(clk), .out({g1_29, g0_29}));
+MSKand_opini2_d2 u_propagate_29 (
+    .ina({carry1[29], carry0[29]}), .inb({p1_29, p0_29}),
+    .rnd(r[59]), .s(s[59]), .clk(clk), .out({t1_29, t0_29}));
+assign carry0[30] = g0_29 ^ t0_29;
+assign carry1[30] = g1_29 ^ t1_29;
+assign sum[58]   = p0_29 ^ carry0[29];
+assign sum[59] = p1_29 ^ carry1[29];
+
+// ---- bit 30 ----
+wire b0_eff_30 = b[60] ^ sub;
+wire p0_30 = a[60]   ^ b0_eff_30;
+wire p1_30 = a[61] ^ b[61];
+wire g0_30, g1_30, t0_30, t1_30;
+MSKand_opini2_d2 u_generate_30 (
+    .ina({a[61], a[60]}), .inb({b[61], b0_eff_30}),
+    .rnd(r[60]), .s(s[60]), .clk(clk), .out({g1_30, g0_30}));
+MSKand_opini2_d2 u_propagate_30 (
+    .ina({carry1[30], carry0[30]}), .inb({p1_30, p0_30}),
+    .rnd(r[61]), .s(s[61]), .clk(clk), .out({t1_30, t0_30}));
+assign carry0[31] = g0_30 ^ t0_30;
+assign carry1[31] = g1_30 ^ t1_30;
+assign sum[60]   = p0_30 ^ carry0[30];
+assign sum[61] = p1_30 ^ carry1[30];
+
+// ---- bit 31 ----
+wire b0_eff_31 = b[62] ^ sub;
+wire p0_31 = a[62]   ^ b0_eff_31;
+wire p1_31 = a[63] ^ b[63];
+wire g0_31, g1_31, t0_31, t1_31;
+MSKand_opini2_d2 u_generate_31 (
+    .ina({a[63], a[62]}), .inb({b[63], b0_eff_31}),
+    .rnd(r[62]), .s(s[62]), .clk(clk), .out({g1_31, g0_31}));
+MSKand_opini2_d2 u_propagate_31 (
+    .ina({carry1[31], carry0[31]}), .inb({p1_31, p0_31}),
+    .rnd(r[63]), .s(s[63]), .clk(clk), .out({t1_31, t0_31}));
+assign carry0[32] = g0_31 ^ t0_31;
+assign carry1[32] = g1_31 ^ t1_31;
+assign sum[62]   = p0_31 ^ carry0[31];
+assign sum[63] = p1_31 ^ carry1[31];
+
+// ---- bit 32 ----
+wire b0_eff_32 = b[64] ^ sub;
+wire p0_32 = a[64]   ^ b0_eff_32;
+wire p1_32 = a[65] ^ b[65];
+wire g0_32, g1_32, t0_32, t1_32;
+MSKand_opini2_d2 u_generate_32 (
+    .ina({a[65], a[64]}), .inb({b[65], b0_eff_32}),
+    .rnd(r[64]), .s(s[64]), .clk(clk), .out({g1_32, g0_32}));
+MSKand_opini2_d2 u_propagate_32 (
+    .ina({carry1[32], carry0[32]}), .inb({p1_32, p0_32}),
+    .rnd(r[65]), .s(s[65]), .clk(clk), .out({t1_32, t0_32}));
+assign carry0[33] = g0_32 ^ t0_32;
+assign carry1[33] = g1_32 ^ t1_32;
+assign sum[64]   = p0_32 ^ carry0[32];
+assign sum[65] = p1_32 ^ carry1[32];
+
+// ---- bit 33 ----
+wire b0_eff_33 = b[66] ^ sub;
+wire p0_33 = a[66]   ^ b0_eff_33;
+wire p1_33 = a[67] ^ b[67];
+wire g0_33, g1_33, t0_33, t1_33;
+MSKand_opini2_d2 u_generate_33 (
+    .ina({a[67], a[66]}), .inb({b[67], b0_eff_33}),
+    .rnd(r[66]), .s(s[66]), .clk(clk), .out({g1_33, g0_33}));
+MSKand_opini2_d2 u_propagate_33 (
+    .ina({carry1[33], carry0[33]}), .inb({p1_33, p0_33}),
+    .rnd(r[67]), .s(s[67]), .clk(clk), .out({t1_33, t0_33}));
+assign carry0[34] = g0_33 ^ t0_33;
+assign carry1[34] = g1_33 ^ t1_33;
+assign sum[66]   = p0_33 ^ carry0[33];
+assign sum[67] = p1_33 ^ carry1[33];
+
+// ---- bit 34 ----
+wire b0_eff_34 = b[68] ^ sub;
+wire p0_34 = a[68]   ^ b0_eff_34;
+wire p1_34 = a[69] ^ b[69];
+wire g0_34, g1_34, t0_34, t1_34;
+MSKand_opini2_d2 u_generate_34 (
+    .ina({a[69], a[68]}), .inb({b[69], b0_eff_34}),
+    .rnd(r[68]), .s(s[68]), .clk(clk), .out({g1_34, g0_34}));
+MSKand_opini2_d2 u_propagate_34 (
+    .ina({carry1[34], carry0[34]}), .inb({p1_34, p0_34}),
+    .rnd(r[69]), .s(s[69]), .clk(clk), .out({t1_34, t0_34}));
+assign carry0[35] = g0_34 ^ t0_34;
+assign carry1[35] = g1_34 ^ t1_34;
+assign sum[68]   = p0_34 ^ carry0[34];
+assign sum[69] = p1_34 ^ carry1[34];
+
+// ---- bit 35 ----
+wire b0_eff_35 = b[70] ^ sub;
+wire p0_35 = a[70]   ^ b0_eff_35;
+wire p1_35 = a[71] ^ b[71];
+wire g0_35, g1_35, t0_35, t1_35;
+MSKand_opini2_d2 u_generate_35 (
+    .ina({a[71], a[70]}), .inb({b[71], b0_eff_35}),
+    .rnd(r[70]), .s(s[70]), .clk(clk), .out({g1_35, g0_35}));
+MSKand_opini2_d2 u_propagate_35 (
+    .ina({carry1[35], carry0[35]}), .inb({p1_35, p0_35}),
+    .rnd(r[71]), .s(s[71]), .clk(clk), .out({t1_35, t0_35}));
+assign carry0[36] = g0_35 ^ t0_35;
+assign carry1[36] = g1_35 ^ t1_35;
+assign sum[70]   = p0_35 ^ carry0[35];
+assign sum[71] = p1_35 ^ carry1[35];
+
+// ---- bit 36 ----
+wire b0_eff_36 = b[72] ^ sub;
+wire p0_36 = a[72]   ^ b0_eff_36;
+wire p1_36 = a[73] ^ b[73];
+wire g0_36, g1_36, t0_36, t1_36;
+MSKand_opini2_d2 u_generate_36 (
+    .ina({a[73], a[72]}), .inb({b[73], b0_eff_36}),
+    .rnd(r[72]), .s(s[72]), .clk(clk), .out({g1_36, g0_36}));
+MSKand_opini2_d2 u_propagate_36 (
+    .ina({carry1[36], carry0[36]}), .inb({p1_36, p0_36}),
+    .rnd(r[73]), .s(s[73]), .clk(clk), .out({t1_36, t0_36}));
+assign carry0[37] = g0_36 ^ t0_36;
+assign carry1[37] = g1_36 ^ t1_36;
+assign sum[72]   = p0_36 ^ carry0[36];
+assign sum[73] = p1_36 ^ carry1[36];
+
+// ---- bit 37 ----
+wire b0_eff_37 = b[74] ^ sub;
+wire p0_37 = a[74]   ^ b0_eff_37;
+wire p1_37 = a[75] ^ b[75];
+wire g0_37, g1_37, t0_37, t1_37;
+MSKand_opini2_d2 u_generate_37 (
+    .ina({a[75], a[74]}), .inb({b[75], b0_eff_37}),
+    .rnd(r[74]), .s(s[74]), .clk(clk), .out({g1_37, g0_37}));
+MSKand_opini2_d2 u_propagate_37 (
+    .ina({carry1[37], carry0[37]}), .inb({p1_37, p0_37}),
+    .rnd(r[75]), .s(s[75]), .clk(clk), .out({t1_37, t0_37}));
+assign carry0[38] = g0_37 ^ t0_37;
+assign carry1[38] = g1_37 ^ t1_37;
+assign sum[74]   = p0_37 ^ carry0[37];
+assign sum[75] = p1_37 ^ carry1[37];
+
+// ---- bit 38 ----
+wire b0_eff_38 = b[76] ^ sub;
+wire p0_38 = a[76]   ^ b0_eff_38;
+wire p1_38 = a[77] ^ b[77];
+wire g0_38, g1_38, t0_38, t1_38;
+MSKand_opini2_d2 u_generate_38 (
+    .ina({a[77], a[76]}), .inb({b[77], b0_eff_38}),
+    .rnd(r[76]), .s(s[76]), .clk(clk), .out({g1_38, g0_38}));
+MSKand_opini2_d2 u_propagate_38 (
+    .ina({carry1[38], carry0[38]}), .inb({p1_38, p0_38}),
+    .rnd(r[77]), .s(s[77]), .clk(clk), .out({t1_38, t0_38}));
+assign carry0[39] = g0_38 ^ t0_38;
+assign carry1[39] = g1_38 ^ t1_38;
+assign sum[76]   = p0_38 ^ carry0[38];
+assign sum[77] = p1_38 ^ carry1[38];
+
+// ---- bit 39 ----
+wire b0_eff_39 = b[78] ^ sub;
+wire p0_39 = a[78]   ^ b0_eff_39;
+wire p1_39 = a[79] ^ b[79];
+wire g0_39, g1_39, t0_39, t1_39;
+MSKand_opini2_d2 u_generate_39 (
+    .ina({a[79], a[78]}), .inb({b[79], b0_eff_39}),
+    .rnd(r[78]), .s(s[78]), .clk(clk), .out({g1_39, g0_39}));
+MSKand_opini2_d2 u_propagate_39 (
+    .ina({carry1[39], carry0[39]}), .inb({p1_39, p0_39}),
+    .rnd(r[79]), .s(s[79]), .clk(clk), .out({t1_39, t0_39}));
+assign carry0[40] = g0_39 ^ t0_39;
+assign carry1[40] = g1_39 ^ t1_39;
+assign sum[78]   = p0_39 ^ carry0[39];
+assign sum[79] = p1_39 ^ carry1[39];
+
+// ---- bit 40 ----
+wire b0_eff_40 = b[80] ^ sub;
+wire p0_40 = a[80]   ^ b0_eff_40;
+wire p1_40 = a[81] ^ b[81];
+wire g0_40, g1_40, t0_40, t1_40;
+MSKand_opini2_d2 u_generate_40 (
+    .ina({a[81], a[80]}), .inb({b[81], b0_eff_40}),
+    .rnd(r[80]), .s(s[80]), .clk(clk), .out({g1_40, g0_40}));
+MSKand_opini2_d2 u_propagate_40 (
+    .ina({carry1[40], carry0[40]}), .inb({p1_40, p0_40}),
+    .rnd(r[81]), .s(s[81]), .clk(clk), .out({t1_40, t0_40}));
+assign carry0[41] = g0_40 ^ t0_40;
+assign carry1[41] = g1_40 ^ t1_40;
+assign sum[80]   = p0_40 ^ carry0[40];
+assign sum[81] = p1_40 ^ carry1[40];
+
+// ---- bit 41 ----
+wire b0_eff_41 = b[82] ^ sub;
+wire p0_41 = a[82]   ^ b0_eff_41;
+wire p1_41 = a[83] ^ b[83];
+wire g0_41, g1_41, t0_41, t1_41;
+MSKand_opini2_d2 u_generate_41 (
+    .ina({a[83], a[82]}), .inb({b[83], b0_eff_41}),
+    .rnd(r[82]), .s(s[82]), .clk(clk), .out({g1_41, g0_41}));
+MSKand_opini2_d2 u_propagate_41 (
+    .ina({carry1[41], carry0[41]}), .inb({p1_41, p0_41}),
+    .rnd(r[83]), .s(s[83]), .clk(clk), .out({t1_41, t0_41}));
+assign carry0[42] = g0_41 ^ t0_41;
+assign carry1[42] = g1_41 ^ t1_41;
+assign sum[82]   = p0_41 ^ carry0[41];
+assign sum[83] = p1_41 ^ carry1[41];
+
+// ---- bit 42 ----
+wire b0_eff_42 = b[84] ^ sub;
+wire p0_42 = a[84]   ^ b0_eff_42;
+wire p1_42 = a[85] ^ b[85];
+wire g0_42, g1_42, t0_42, t1_42;
+MSKand_opini2_d2 u_generate_42 (
+    .ina({a[85], a[84]}), .inb({b[85], b0_eff_42}),
+    .rnd(r[84]), .s(s[84]), .clk(clk), .out({g1_42, g0_42}));
+MSKand_opini2_d2 u_propagate_42 (
+    .ina({carry1[42], carry0[42]}), .inb({p1_42, p0_42}),
+    .rnd(r[85]), .s(s[85]), .clk(clk), .out({t1_42, t0_42}));
+assign carry0[43] = g0_42 ^ t0_42;
+assign carry1[43] = g1_42 ^ t1_42;
+assign sum[84]   = p0_42 ^ carry0[42];
+assign sum[85] = p1_42 ^ carry1[42];
+
+// ---- bit 43 ----
+wire b0_eff_43 = b[86] ^ sub;
+wire p0_43 = a[86]   ^ b0_eff_43;
+wire p1_43 = a[87] ^ b[87];
+wire g0_43, g1_43, t0_43, t1_43;
+MSKand_opini2_d2 u_generate_43 (
+    .ina({a[87], a[86]}), .inb({b[87], b0_eff_43}),
+    .rnd(r[86]), .s(s[86]), .clk(clk), .out({g1_43, g0_43}));
+MSKand_opini2_d2 u_propagate_43 (
+    .ina({carry1[43], carry0[43]}), .inb({p1_43, p0_43}),
+    .rnd(r[87]), .s(s[87]), .clk(clk), .out({t1_43, t0_43}));
+assign carry0[44] = g0_43 ^ t0_43;
+assign carry1[44] = g1_43 ^ t1_43;
+assign sum[86]   = p0_43 ^ carry0[43];
+assign sum[87] = p1_43 ^ carry1[43];
+
+// ---- bit 44 ----
+wire b0_eff_44 = b[88] ^ sub;
+wire p0_44 = a[88]   ^ b0_eff_44;
+wire p1_44 = a[89] ^ b[89];
+wire g0_44, g1_44, t0_44, t1_44;
+MSKand_opini2_d2 u_generate_44 (
+    .ina({a[89], a[88]}), .inb({b[89], b0_eff_44}),
+    .rnd(r[88]), .s(s[88]), .clk(clk), .out({g1_44, g0_44}));
+MSKand_opini2_d2 u_propagate_44 (
+    .ina({carry1[44], carry0[44]}), .inb({p1_44, p0_44}),
+    .rnd(r[89]), .s(s[89]), .clk(clk), .out({t1_44, t0_44}));
+assign carry0[45] = g0_44 ^ t0_44;
+assign carry1[45] = g1_44 ^ t1_44;
+assign sum[88]   = p0_44 ^ carry0[44];
+assign sum[89] = p1_44 ^ carry1[44];
+
+// ---- bit 45 ----
+wire b0_eff_45 = b[90] ^ sub;
+wire p0_45 = a[90]   ^ b0_eff_45;
+wire p1_45 = a[91] ^ b[91];
+wire g0_45, g1_45, t0_45, t1_45;
+MSKand_opini2_d2 u_generate_45 (
+    .ina({a[91], a[90]}), .inb({b[91], b0_eff_45}),
+    .rnd(r[90]), .s(s[90]), .clk(clk), .out({g1_45, g0_45}));
+MSKand_opini2_d2 u_propagate_45 (
+    .ina({carry1[45], carry0[45]}), .inb({p1_45, p0_45}),
+    .rnd(r[91]), .s(s[91]), .clk(clk), .out({t1_45, t0_45}));
+assign carry0[46] = g0_45 ^ t0_45;
+assign carry1[46] = g1_45 ^ t1_45;
+assign sum[90]   = p0_45 ^ carry0[45];
+assign sum[91] = p1_45 ^ carry1[45];
+
+// ---- bit 46 ----
+wire b0_eff_46 = b[92] ^ sub;
+wire p0_46 = a[92]   ^ b0_eff_46;
+wire p1_46 = a[93] ^ b[93];
+wire g0_46, g1_46, t0_46, t1_46;
+MSKand_opini2_d2 u_generate_46 (
+    .ina({a[93], a[92]}), .inb({b[93], b0_eff_46}),
+    .rnd(r[92]), .s(s[92]), .clk(clk), .out({g1_46, g0_46}));
+MSKand_opini2_d2 u_propagate_46 (
+    .ina({carry1[46], carry0[46]}), .inb({p1_46, p0_46}),
+    .rnd(r[93]), .s(s[93]), .clk(clk), .out({t1_46, t0_46}));
+assign carry0[47] = g0_46 ^ t0_46;
+assign carry1[47] = g1_46 ^ t1_46;
+assign sum[92]   = p0_46 ^ carry0[46];
+assign sum[93] = p1_46 ^ carry1[46];
+
+// ---- bit 47 ----
+wire b0_eff_47 = b[94] ^ sub;
+wire p0_47 = a[94]   ^ b0_eff_47;
+wire p1_47 = a[95] ^ b[95];
+wire g0_47, g1_47, t0_47, t1_47;
+MSKand_opini2_d2 u_generate_47 (
+    .ina({a[95], a[94]}), .inb({b[95], b0_eff_47}),
+    .rnd(r[94]), .s(s[94]), .clk(clk), .out({g1_47, g0_47}));
+MSKand_opini2_d2 u_propagate_47 (
+    .ina({carry1[47], carry0[47]}), .inb({p1_47, p0_47}),
+    .rnd(r[95]), .s(s[95]), .clk(clk), .out({t1_47, t0_47}));
+assign carry0[48] = g0_47 ^ t0_47;
+assign carry1[48] = g1_47 ^ t1_47;
+assign sum[94]   = p0_47 ^ carry0[47];
+assign sum[95] = p1_47 ^ carry1[47];
+
+// ---- bit 48 ----
+wire b0_eff_48 = b[96] ^ sub;
+wire p0_48 = a[96]   ^ b0_eff_48;
+wire p1_48 = a[97] ^ b[97];
+wire g0_48, g1_48, t0_48, t1_48;
+MSKand_opini2_d2 u_generate_48 (
+    .ina({a[97], a[96]}), .inb({b[97], b0_eff_48}),
+    .rnd(r[96]), .s(s[96]), .clk(clk), .out({g1_48, g0_48}));
+MSKand_opini2_d2 u_propagate_48 (
+    .ina({carry1[48], carry0[48]}), .inb({p1_48, p0_48}),
+    .rnd(r[97]), .s(s[97]), .clk(clk), .out({t1_48, t0_48}));
+assign carry0[49] = g0_48 ^ t0_48;
+assign carry1[49] = g1_48 ^ t1_48;
+assign sum[96]   = p0_48 ^ carry0[48];
+assign sum[97] = p1_48 ^ carry1[48];
+
+// ---- bit 49 ----
+wire b0_eff_49 = b[98] ^ sub;
+wire p0_49 = a[98]   ^ b0_eff_49;
+wire p1_49 = a[99] ^ b[99];
+wire g0_49, g1_49, t0_49, t1_49;
+MSKand_opini2_d2 u_generate_49 (
+    .ina({a[99], a[98]}), .inb({b[99], b0_eff_49}),
+    .rnd(r[98]), .s(s[98]), .clk(clk), .out({g1_49, g0_49}));
+MSKand_opini2_d2 u_propagate_49 (
+    .ina({carry1[49], carry0[49]}), .inb({p1_49, p0_49}),
+    .rnd(r[99]), .s(s[99]), .clk(clk), .out({t1_49, t0_49}));
+assign carry0[50] = g0_49 ^ t0_49;
+assign carry1[50] = g1_49 ^ t1_49;
+assign sum[98]   = p0_49 ^ carry0[49];
+assign sum[99] = p1_49 ^ carry1[49];
+
+// ---- bit 50 ----
+wire b0_eff_50 = b[100] ^ sub;
+wire p0_50 = a[100]   ^ b0_eff_50;
+wire p1_50 = a[101] ^ b[101];
+wire g0_50, g1_50, t0_50, t1_50;
+MSKand_opini2_d2 u_generate_50 (
+    .ina({a[101], a[100]}), .inb({b[101], b0_eff_50}),
+    .rnd(r[100]), .s(s[100]), .clk(clk), .out({g1_50, g0_50}));
+MSKand_opini2_d2 u_propagate_50 (
+    .ina({carry1[50], carry0[50]}), .inb({p1_50, p0_50}),
+    .rnd(r[101]), .s(s[101]), .clk(clk), .out({t1_50, t0_50}));
+assign carry0[51] = g0_50 ^ t0_50;
+assign carry1[51] = g1_50 ^ t1_50;
+assign sum[100]   = p0_50 ^ carry0[50];
+assign sum[101] = p1_50 ^ carry1[50];
+
+// ---- bit 51 ----
+wire b0_eff_51 = b[102] ^ sub;
+wire p0_51 = a[102]   ^ b0_eff_51;
+wire p1_51 = a[103] ^ b[103];
+wire g0_51, g1_51, t0_51, t1_51;
+MSKand_opini2_d2 u_generate_51 (
+    .ina({a[103], a[102]}), .inb({b[103], b0_eff_51}),
+    .rnd(r[102]), .s(s[102]), .clk(clk), .out({g1_51, g0_51}));
+MSKand_opini2_d2 u_propagate_51 (
+    .ina({carry1[51], carry0[51]}), .inb({p1_51, p0_51}),
+    .rnd(r[103]), .s(s[103]), .clk(clk), .out({t1_51, t0_51}));
+assign carry0[52] = g0_51 ^ t0_51;
+assign carry1[52] = g1_51 ^ t1_51;
+assign sum[102]   = p0_51 ^ carry0[51];
+assign sum[103] = p1_51 ^ carry1[51];
+
+// ---- bit 52 ----
+wire b0_eff_52 = b[104] ^ sub;
+wire p0_52 = a[104]   ^ b0_eff_52;
+wire p1_52 = a[105] ^ b[105];
+wire g0_52, g1_52, t0_52, t1_52;
+MSKand_opini2_d2 u_generate_52 (
+    .ina({a[105], a[104]}), .inb({b[105], b0_eff_52}),
+    .rnd(r[104]), .s(s[104]), .clk(clk), .out({g1_52, g0_52}));
+MSKand_opini2_d2 u_propagate_52 (
+    .ina({carry1[52], carry0[52]}), .inb({p1_52, p0_52}),
+    .rnd(r[105]), .s(s[105]), .clk(clk), .out({t1_52, t0_52}));
+assign carry0[53] = g0_52 ^ t0_52;
+assign carry1[53] = g1_52 ^ t1_52;
+assign sum[104]   = p0_52 ^ carry0[52];
+assign sum[105] = p1_52 ^ carry1[52];
+
+// ---- bit 53 ----
+wire b0_eff_53 = b[106] ^ sub;
+wire p0_53 = a[106]   ^ b0_eff_53;
+wire p1_53 = a[107] ^ b[107];
+wire g0_53, g1_53, t0_53, t1_53;
+MSKand_opini2_d2 u_generate_53 (
+    .ina({a[107], a[106]}), .inb({b[107], b0_eff_53}),
+    .rnd(r[106]), .s(s[106]), .clk(clk), .out({g1_53, g0_53}));
+MSKand_opini2_d2 u_propagate_53 (
+    .ina({carry1[53], carry0[53]}), .inb({p1_53, p0_53}),
+    .rnd(r[107]), .s(s[107]), .clk(clk), .out({t1_53, t0_53}));
+assign carry0[54] = g0_53 ^ t0_53;
+assign carry1[54] = g1_53 ^ t1_53;
+assign sum[106]   = p0_53 ^ carry0[53];
+assign sum[107] = p1_53 ^ carry1[53];
+
+// ---- bit 54 ----
+wire b0_eff_54 = b[108] ^ sub;
+wire p0_54 = a[108]   ^ b0_eff_54;
+wire p1_54 = a[109] ^ b[109];
+wire g0_54, g1_54, t0_54, t1_54;
+MSKand_opini2_d2 u_generate_54 (
+    .ina({a[109], a[108]}), .inb({b[109], b0_eff_54}),
+    .rnd(r[108]), .s(s[108]), .clk(clk), .out({g1_54, g0_54}));
+MSKand_opini2_d2 u_propagate_54 (
+    .ina({carry1[54], carry0[54]}), .inb({p1_54, p0_54}),
+    .rnd(r[109]), .s(s[109]), .clk(clk), .out({t1_54, t0_54}));
+assign carry0[55] = g0_54 ^ t0_54;
+assign carry1[55] = g1_54 ^ t1_54;
+assign sum[108]   = p0_54 ^ carry0[54];
+assign sum[109] = p1_54 ^ carry1[54];
+
+// ---- bit 55 ----
+wire b0_eff_55 = b[110] ^ sub;
+wire p0_55 = a[110]   ^ b0_eff_55;
+wire p1_55 = a[111] ^ b[111];
+wire g0_55, g1_55, t0_55, t1_55;
+MSKand_opini2_d2 u_generate_55 (
+    .ina({a[111], a[110]}), .inb({b[111], b0_eff_55}),
+    .rnd(r[110]), .s(s[110]), .clk(clk), .out({g1_55, g0_55}));
+MSKand_opini2_d2 u_propagate_55 (
+    .ina({carry1[55], carry0[55]}), .inb({p1_55, p0_55}),
+    .rnd(r[111]), .s(s[111]), .clk(clk), .out({t1_55, t0_55}));
+assign carry0[56] = g0_55 ^ t0_55;
+assign carry1[56] = g1_55 ^ t1_55;
+assign sum[110]   = p0_55 ^ carry0[55];
+assign sum[111] = p1_55 ^ carry1[55];
+
+// ---- bit 56 ----
+wire b0_eff_56 = b[112] ^ sub;
+wire p0_56 = a[112]   ^ b0_eff_56;
+wire p1_56 = a[113] ^ b[113];
+wire g0_56, g1_56, t0_56, t1_56;
+MSKand_opini2_d2 u_generate_56 (
+    .ina({a[113], a[112]}), .inb({b[113], b0_eff_56}),
+    .rnd(r[112]), .s(s[112]), .clk(clk), .out({g1_56, g0_56}));
+MSKand_opini2_d2 u_propagate_56 (
+    .ina({carry1[56], carry0[56]}), .inb({p1_56, p0_56}),
+    .rnd(r[113]), .s(s[113]), .clk(clk), .out({t1_56, t0_56}));
+assign carry0[57] = g0_56 ^ t0_56;
+assign carry1[57] = g1_56 ^ t1_56;
+assign sum[112]   = p0_56 ^ carry0[56];
+assign sum[113] = p1_56 ^ carry1[56];
+
+// ---- bit 57 ----
+wire b0_eff_57 = b[114] ^ sub;
+wire p0_57 = a[114]   ^ b0_eff_57;
+wire p1_57 = a[115] ^ b[115];
+wire g0_57, g1_57, t0_57, t1_57;
+MSKand_opini2_d2 u_generate_57 (
+    .ina({a[115], a[114]}), .inb({b[115], b0_eff_57}),
+    .rnd(r[114]), .s(s[114]), .clk(clk), .out({g1_57, g0_57}));
+MSKand_opini2_d2 u_propagate_57 (
+    .ina({carry1[57], carry0[57]}), .inb({p1_57, p0_57}),
+    .rnd(r[115]), .s(s[115]), .clk(clk), .out({t1_57, t0_57}));
+assign carry0[58] = g0_57 ^ t0_57;
+assign carry1[58] = g1_57 ^ t1_57;
+assign sum[114]   = p0_57 ^ carry0[57];
+assign sum[115] = p1_57 ^ carry1[57];
+
+// ---- bit 58 ----
+wire b0_eff_58 = b[116] ^ sub;
+wire p0_58 = a[116]   ^ b0_eff_58;
+wire p1_58 = a[117] ^ b[117];
+wire g0_58, g1_58, t0_58, t1_58;
+MSKand_opini2_d2 u_generate_58 (
+    .ina({a[117], a[116]}), .inb({b[117], b0_eff_58}),
+    .rnd(r[116]), .s(s[116]), .clk(clk), .out({g1_58, g0_58}));
+MSKand_opini2_d2 u_propagate_58 (
+    .ina({carry1[58], carry0[58]}), .inb({p1_58, p0_58}),
+    .rnd(r[117]), .s(s[117]), .clk(clk), .out({t1_58, t0_58}));
+assign carry0[59] = g0_58 ^ t0_58;
+assign carry1[59] = g1_58 ^ t1_58;
+assign sum[116]   = p0_58 ^ carry0[58];
+assign sum[117] = p1_58 ^ carry1[58];
+
+// ---- bit 59 ----
+wire b0_eff_59 = b[118] ^ sub;
+wire p0_59 = a[118]   ^ b0_eff_59;
+wire p1_59 = a[119] ^ b[119];
+wire g0_59, g1_59, t0_59, t1_59;
+MSKand_opini2_d2 u_generate_59 (
+    .ina({a[119], a[118]}), .inb({b[119], b0_eff_59}),
+    .rnd(r[118]), .s(s[118]), .clk(clk), .out({g1_59, g0_59}));
+MSKand_opini2_d2 u_propagate_59 (
+    .ina({carry1[59], carry0[59]}), .inb({p1_59, p0_59}),
+    .rnd(r[119]), .s(s[119]), .clk(clk), .out({t1_59, t0_59}));
+assign carry0[60] = g0_59 ^ t0_59;
+assign carry1[60] = g1_59 ^ t1_59;
+assign sum[118]   = p0_59 ^ carry0[59];
+assign sum[119] = p1_59 ^ carry1[59];
+
+// ---- bit 60 ----
+wire b0_eff_60 = b[120] ^ sub;
+wire p0_60 = a[120]   ^ b0_eff_60;
+wire p1_60 = a[121] ^ b[121];
+wire g0_60, g1_60, t0_60, t1_60;
+MSKand_opini2_d2 u_generate_60 (
+    .ina({a[121], a[120]}), .inb({b[121], b0_eff_60}),
+    .rnd(r[120]), .s(s[120]), .clk(clk), .out({g1_60, g0_60}));
+MSKand_opini2_d2 u_propagate_60 (
+    .ina({carry1[60], carry0[60]}), .inb({p1_60, p0_60}),
+    .rnd(r[121]), .s(s[121]), .clk(clk), .out({t1_60, t0_60}));
+assign carry0[61] = g0_60 ^ t0_60;
+assign carry1[61] = g1_60 ^ t1_60;
+assign sum[120]   = p0_60 ^ carry0[60];
+assign sum[121] = p1_60 ^ carry1[60];
+
+// ---- bit 61 ----
+wire b0_eff_61 = b[122] ^ sub;
+wire p0_61 = a[122]   ^ b0_eff_61;
+wire p1_61 = a[123] ^ b[123];
+wire g0_61, g1_61, t0_61, t1_61;
+MSKand_opini2_d2 u_generate_61 (
+    .ina({a[123], a[122]}), .inb({b[123], b0_eff_61}),
+    .rnd(r[122]), .s(s[122]), .clk(clk), .out({g1_61, g0_61}));
+MSKand_opini2_d2 u_propagate_61 (
+    .ina({carry1[61], carry0[61]}), .inb({p1_61, p0_61}),
+    .rnd(r[123]), .s(s[123]), .clk(clk), .out({t1_61, t0_61}));
+assign carry0[62] = g0_61 ^ t0_61;
+assign carry1[62] = g1_61 ^ t1_61;
+assign sum[122]   = p0_61 ^ carry0[61];
+assign sum[123] = p1_61 ^ carry1[61];
+
+// ---- bit 62 ----
+wire b0_eff_62 = b[124] ^ sub;
+wire p0_62 = a[124]   ^ b0_eff_62;
+wire p1_62 = a[125] ^ b[125];
+wire g0_62, g1_62, t0_62, t1_62;
+MSKand_opini2_d2 u_generate_62 (
+    .ina({a[125], a[124]}), .inb({b[125], b0_eff_62}),
+    .rnd(r[124]), .s(s[124]), .clk(clk), .out({g1_62, g0_62}));
+MSKand_opini2_d2 u_propagate_62 (
+    .ina({carry1[62], carry0[62]}), .inb({p1_62, p0_62}),
+    .rnd(r[125]), .s(s[125]), .clk(clk), .out({t1_62, t0_62}));
+assign carry0[63] = g0_62 ^ t0_62;
+assign carry1[63] = g1_62 ^ t1_62;
+assign sum[124]   = p0_62 ^ carry0[62];
+assign sum[125] = p1_62 ^ carry1[62];
+
+// ---- bit 63 ----
+wire b0_eff_63 = b[126] ^ sub;
+wire p0_63 = a[126]   ^ b0_eff_63;
+wire p1_63 = a[127] ^ b[127];
+wire g0_63, g1_63, t0_63, t1_63;
+MSKand_opini2_d2 u_generate_63 (
+    .ina({a[127], a[126]}), .inb({b[127], b0_eff_63}),
+    .rnd(r[126]), .s(s[126]), .clk(clk), .out({g1_63, g0_63}));
+MSKand_opini2_d2 u_propagate_63 (
+    .ina({carry1[63], carry0[63]}), .inb({p1_63, p0_63}),
+    .rnd(r[127]), .s(s[127]), .clk(clk), .out({t1_63, t0_63}));
+assign carry0[64] = g0_63 ^ t0_63;
+assign carry1[64] = g1_63 ^ t1_63;
+assign sum[126]   = p0_63 ^ carry0[63];
+assign sum[127] = p1_63 ^ carry1[63];
+
+// ---- bit 64 ----
+wire b0_eff_64 = b[128] ^ sub;
+wire p0_64 = a[128]   ^ b0_eff_64;
+wire p1_64 = a[129] ^ b[129];
+wire g0_64, g1_64, t0_64, t1_64;
+MSKand_opini2_d2 u_generate_64 (
+    .ina({a[129], a[128]}), .inb({b[129], b0_eff_64}),
+    .rnd(r[128]), .s(s[128]), .clk(clk), .out({g1_64, g0_64}));
+MSKand_opini2_d2 u_propagate_64 (
+    .ina({carry1[64], carry0[64]}), .inb({p1_64, p0_64}),
+    .rnd(r[129]), .s(s[129]), .clk(clk), .out({t1_64, t0_64}));
+assign carry0[65] = g0_64 ^ t0_64;
+assign carry1[65] = g1_64 ^ t1_64;
+assign sum[128]   = p0_64 ^ carry0[64];
+assign sum[129] = p1_64 ^ carry1[64];
+
+// ---- bit 65 ----
+wire b0_eff_65 = b[130] ^ sub;
+wire p0_65 = a[130]   ^ b0_eff_65;
+wire p1_65 = a[131] ^ b[131];
+wire g0_65, g1_65, t0_65, t1_65;
+MSKand_opini2_d2 u_generate_65 (
+    .ina({a[131], a[130]}), .inb({b[131], b0_eff_65}),
+    .rnd(r[130]), .s(s[130]), .clk(clk), .out({g1_65, g0_65}));
+MSKand_opini2_d2 u_propagate_65 (
+    .ina({carry1[65], carry0[65]}), .inb({p1_65, p0_65}),
+    .rnd(r[131]), .s(s[131]), .clk(clk), .out({t1_65, t0_65}));
+assign carry0[66] = g0_65 ^ t0_65;
+assign carry1[66] = g1_65 ^ t1_65;
+assign sum[130]   = p0_65 ^ carry0[65];
+assign sum[131] = p1_65 ^ carry1[65];
+
+// ---- bit 66 ----
+wire b0_eff_66 = b[132] ^ sub;
+wire p0_66 = a[132]   ^ b0_eff_66;
+wire p1_66 = a[133] ^ b[133];
+wire g0_66, g1_66, t0_66, t1_66;
+MSKand_opini2_d2 u_generate_66 (
+    .ina({a[133], a[132]}), .inb({b[133], b0_eff_66}),
+    .rnd(r[132]), .s(s[132]), .clk(clk), .out({g1_66, g0_66}));
+MSKand_opini2_d2 u_propagate_66 (
+    .ina({carry1[66], carry0[66]}), .inb({p1_66, p0_66}),
+    .rnd(r[133]), .s(s[133]), .clk(clk), .out({t1_66, t0_66}));
+assign carry0[67] = g0_66 ^ t0_66;
+assign carry1[67] = g1_66 ^ t1_66;
+assign sum[132]   = p0_66 ^ carry0[66];
+assign sum[133] = p1_66 ^ carry1[66];
+
+// ---- bit 67 ----
+wire b0_eff_67 = b[134] ^ sub;
+wire p0_67 = a[134]   ^ b0_eff_67;
+wire p1_67 = a[135] ^ b[135];
+wire g0_67, g1_67, t0_67, t1_67;
+MSKand_opini2_d2 u_generate_67 (
+    .ina({a[135], a[134]}), .inb({b[135], b0_eff_67}),
+    .rnd(r[134]), .s(s[134]), .clk(clk), .out({g1_67, g0_67}));
+MSKand_opini2_d2 u_propagate_67 (
+    .ina({carry1[67], carry0[67]}), .inb({p1_67, p0_67}),
+    .rnd(r[135]), .s(s[135]), .clk(clk), .out({t1_67, t0_67}));
+assign carry0[68] = g0_67 ^ t0_67;
+assign carry1[68] = g1_67 ^ t1_67;
+assign sum[134]   = p0_67 ^ carry0[67];
+assign sum[135] = p1_67 ^ carry1[67];
+
+// ---- bit 68 ----
+wire b0_eff_68 = b[136] ^ sub;
+wire p0_68 = a[136]   ^ b0_eff_68;
+wire p1_68 = a[137] ^ b[137];
+wire g0_68, g1_68, t0_68, t1_68;
+MSKand_opini2_d2 u_generate_68 (
+    .ina({a[137], a[136]}), .inb({b[137], b0_eff_68}),
+    .rnd(r[136]), .s(s[136]), .clk(clk), .out({g1_68, g0_68}));
+MSKand_opini2_d2 u_propagate_68 (
+    .ina({carry1[68], carry0[68]}), .inb({p1_68, p0_68}),
+    .rnd(r[137]), .s(s[137]), .clk(clk), .out({t1_68, t0_68}));
+assign carry0[69] = g0_68 ^ t0_68;
+assign carry1[69] = g1_68 ^ t1_68;
+assign sum[136]   = p0_68 ^ carry0[68];
+assign sum[137] = p1_68 ^ carry1[68];
+
+// ---- bit 69 ----
+wire b0_eff_69 = b[138] ^ sub;
+wire p0_69 = a[138]   ^ b0_eff_69;
+wire p1_69 = a[139] ^ b[139];
+wire g0_69, g1_69, t0_69, t1_69;
+MSKand_opini2_d2 u_generate_69 (
+    .ina({a[139], a[138]}), .inb({b[139], b0_eff_69}),
+    .rnd(r[138]), .s(s[138]), .clk(clk), .out({g1_69, g0_69}));
+MSKand_opini2_d2 u_propagate_69 (
+    .ina({carry1[69], carry0[69]}), .inb({p1_69, p0_69}),
+    .rnd(r[139]), .s(s[139]), .clk(clk), .out({t1_69, t0_69}));
+assign carry0[70] = g0_69 ^ t0_69;
+assign carry1[70] = g1_69 ^ t1_69;
+assign sum[138]   = p0_69 ^ carry0[69];
+assign sum[139] = p1_69 ^ carry1[69];
+
+// ---- bit 70 ----
+wire b0_eff_70 = b[140] ^ sub;
+wire p0_70 = a[140]   ^ b0_eff_70;
+wire p1_70 = a[141] ^ b[141];
+wire g0_70, g1_70, t0_70, t1_70;
+MSKand_opini2_d2 u_generate_70 (
+    .ina({a[141], a[140]}), .inb({b[141], b0_eff_70}),
+    .rnd(r[140]), .s(s[140]), .clk(clk), .out({g1_70, g0_70}));
+MSKand_opini2_d2 u_propagate_70 (
+    .ina({carry1[70], carry0[70]}), .inb({p1_70, p0_70}),
+    .rnd(r[141]), .s(s[141]), .clk(clk), .out({t1_70, t0_70}));
+assign carry0[71] = g0_70 ^ t0_70;
+assign carry1[71] = g1_70 ^ t1_70;
+assign sum[140]   = p0_70 ^ carry0[70];
+assign sum[141] = p1_70 ^ carry1[70];
+
+// ---- bit 71 ----
+wire b0_eff_71 = b[142] ^ sub;
+wire p0_71 = a[142]   ^ b0_eff_71;
+wire p1_71 = a[143] ^ b[143];
+wire g0_71, g1_71, t0_71, t1_71;
+MSKand_opini2_d2 u_generate_71 (
+    .ina({a[143], a[142]}), .inb({b[143], b0_eff_71}),
+    .rnd(r[142]), .s(s[142]), .clk(clk), .out({g1_71, g0_71}));
+MSKand_opini2_d2 u_propagate_71 (
+    .ina({carry1[71], carry0[71]}), .inb({p1_71, p0_71}),
+    .rnd(r[143]), .s(s[143]), .clk(clk), .out({t1_71, t0_71}));
+assign carry0[72] = g0_71 ^ t0_71;
+assign carry1[72] = g1_71 ^ t1_71;
+assign sum[142]   = p0_71 ^ carry0[71];
+assign sum[143] = p1_71 ^ carry1[71];
+
+// ---- bit 72 ----
+wire b0_eff_72 = b[144] ^ sub;
+wire p0_72 = a[144]   ^ b0_eff_72;
+wire p1_72 = a[145] ^ b[145];
+wire g0_72, g1_72, t0_72, t1_72;
+MSKand_opini2_d2 u_generate_72 (
+    .ina({a[145], a[144]}), .inb({b[145], b0_eff_72}),
+    .rnd(r[144]), .s(s[144]), .clk(clk), .out({g1_72, g0_72}));
+MSKand_opini2_d2 u_propagate_72 (
+    .ina({carry1[72], carry0[72]}), .inb({p1_72, p0_72}),
+    .rnd(r[145]), .s(s[145]), .clk(clk), .out({t1_72, t0_72}));
+assign carry0[73] = g0_72 ^ t0_72;
+assign carry1[73] = g1_72 ^ t1_72;
+assign sum[144]   = p0_72 ^ carry0[72];
+assign sum[145] = p1_72 ^ carry1[72];
+
+// ---- bit 73 ----
+wire b0_eff_73 = b[146] ^ sub;
+wire p0_73 = a[146]   ^ b0_eff_73;
+wire p1_73 = a[147] ^ b[147];
+wire g0_73, g1_73, t0_73, t1_73;
+MSKand_opini2_d2 u_generate_73 (
+    .ina({a[147], a[146]}), .inb({b[147], b0_eff_73}),
+    .rnd(r[146]), .s(s[146]), .clk(clk), .out({g1_73, g0_73}));
+MSKand_opini2_d2 u_propagate_73 (
+    .ina({carry1[73], carry0[73]}), .inb({p1_73, p0_73}),
+    .rnd(r[147]), .s(s[147]), .clk(clk), .out({t1_73, t0_73}));
+assign carry0[74] = g0_73 ^ t0_73;
+assign carry1[74] = g1_73 ^ t1_73;
+assign sum[146]   = p0_73 ^ carry0[73];
+assign sum[147] = p1_73 ^ carry1[73];
+
+// ---- bit 74 ----
+wire b0_eff_74 = b[148] ^ sub;
+wire p0_74 = a[148]   ^ b0_eff_74;
+wire p1_74 = a[149] ^ b[149];
+wire g0_74, g1_74, t0_74, t1_74;
+MSKand_opini2_d2 u_generate_74 (
+    .ina({a[149], a[148]}), .inb({b[149], b0_eff_74}),
+    .rnd(r[148]), .s(s[148]), .clk(clk), .out({g1_74, g0_74}));
+MSKand_opini2_d2 u_propagate_74 (
+    .ina({carry1[74], carry0[74]}), .inb({p1_74, p0_74}),
+    .rnd(r[149]), .s(s[149]), .clk(clk), .out({t1_74, t0_74}));
+assign carry0[75] = g0_74 ^ t0_74;
+assign carry1[75] = g1_74 ^ t1_74;
+assign sum[148]   = p0_74 ^ carry0[74];
+assign sum[149] = p1_74 ^ carry1[74];
+
+// ---- bit 75 ----
+wire b0_eff_75 = b[150] ^ sub;
+wire p0_75 = a[150]   ^ b0_eff_75;
+wire p1_75 = a[151] ^ b[151];
+wire g0_75, g1_75, t0_75, t1_75;
+MSKand_opini2_d2 u_generate_75 (
+    .ina({a[151], a[150]}), .inb({b[151], b0_eff_75}),
+    .rnd(r[150]), .s(s[150]), .clk(clk), .out({g1_75, g0_75}));
+MSKand_opini2_d2 u_propagate_75 (
+    .ina({carry1[75], carry0[75]}), .inb({p1_75, p0_75}),
+    .rnd(r[151]), .s(s[151]), .clk(clk), .out({t1_75, t0_75}));
+assign carry0[76] = g0_75 ^ t0_75;
+assign carry1[76] = g1_75 ^ t1_75;
+assign sum[150]   = p0_75 ^ carry0[75];
+assign sum[151] = p1_75 ^ carry1[75];
+
+// ---- bit 76 ----
+wire b0_eff_76 = b[152] ^ sub;
+wire p0_76 = a[152]   ^ b0_eff_76;
+wire p1_76 = a[153] ^ b[153];
+wire g0_76, g1_76, t0_76, t1_76;
+MSKand_opini2_d2 u_generate_76 (
+    .ina({a[153], a[152]}), .inb({b[153], b0_eff_76}),
+    .rnd(r[152]), .s(s[152]), .clk(clk), .out({g1_76, g0_76}));
+MSKand_opini2_d2 u_propagate_76 (
+    .ina({carry1[76], carry0[76]}), .inb({p1_76, p0_76}),
+    .rnd(r[153]), .s(s[153]), .clk(clk), .out({t1_76, t0_76}));
+assign carry0[77] = g0_76 ^ t0_76;
+assign carry1[77] = g1_76 ^ t1_76;
+assign sum[152]   = p0_76 ^ carry0[76];
+assign sum[153] = p1_76 ^ carry1[76];
+
+// ---- bit 77 ----
+wire b0_eff_77 = b[154] ^ sub;
+wire p0_77 = a[154]   ^ b0_eff_77;
+wire p1_77 = a[155] ^ b[155];
+wire g0_77, g1_77, t0_77, t1_77;
+MSKand_opini2_d2 u_generate_77 (
+    .ina({a[155], a[154]}), .inb({b[155], b0_eff_77}),
+    .rnd(r[154]), .s(s[154]), .clk(clk), .out({g1_77, g0_77}));
+MSKand_opini2_d2 u_propagate_77 (
+    .ina({carry1[77], carry0[77]}), .inb({p1_77, p0_77}),
+    .rnd(r[155]), .s(s[155]), .clk(clk), .out({t1_77, t0_77}));
+assign carry0[78] = g0_77 ^ t0_77;
+assign carry1[78] = g1_77 ^ t1_77;
+assign sum[154]   = p0_77 ^ carry0[77];
+assign sum[155] = p1_77 ^ carry1[77];
+
+// ---- bit 78 ----
+wire b0_eff_78 = b[156] ^ sub;
+wire p0_78 = a[156]   ^ b0_eff_78;
+wire p1_78 = a[157] ^ b[157];
+wire g0_78, g1_78, t0_78, t1_78;
+MSKand_opini2_d2 u_generate_78 (
+    .ina({a[157], a[156]}), .inb({b[157], b0_eff_78}),
+    .rnd(r[156]), .s(s[156]), .clk(clk), .out({g1_78, g0_78}));
+MSKand_opini2_d2 u_propagate_78 (
+    .ina({carry1[78], carry0[78]}), .inb({p1_78, p0_78}),
+    .rnd(r[157]), .s(s[157]), .clk(clk), .out({t1_78, t0_78}));
+assign carry0[79] = g0_78 ^ t0_78;
+assign carry1[79] = g1_78 ^ t1_78;
+assign sum[156]   = p0_78 ^ carry0[78];
+assign sum[157] = p1_78 ^ carry1[78];
+
+// ---- bit 79 ----
+wire b0_eff_79 = b[158] ^ sub;
+wire p0_79 = a[158]   ^ b0_eff_79;
+wire p1_79 = a[159] ^ b[159];
+wire g0_79, g1_79, t0_79, t1_79;
+MSKand_opini2_d2 u_generate_79 (
+    .ina({a[159], a[158]}), .inb({b[159], b0_eff_79}),
+    .rnd(r[158]), .s(s[158]), .clk(clk), .out({g1_79, g0_79}));
+MSKand_opini2_d2 u_propagate_79 (
+    .ina({carry1[79], carry0[79]}), .inb({p1_79, p0_79}),
+    .rnd(r[159]), .s(s[159]), .clk(clk), .out({t1_79, t0_79}));
+assign carry0[80] = g0_79 ^ t0_79;
+assign carry1[80] = g1_79 ^ t1_79;
+assign sum[158]   = p0_79 ^ carry0[79];
+assign sum[159] = p1_79 ^ carry1[79];
+
+// ---- bit 80 ----
+wire b0_eff_80 = b[160] ^ sub;
+wire p0_80 = a[160]   ^ b0_eff_80;
+wire p1_80 = a[161] ^ b[161];
+wire g0_80, g1_80, t0_80, t1_80;
+MSKand_opini2_d2 u_generate_80 (
+    .ina({a[161], a[160]}), .inb({b[161], b0_eff_80}),
+    .rnd(r[160]), .s(s[160]), .clk(clk), .out({g1_80, g0_80}));
+MSKand_opini2_d2 u_propagate_80 (
+    .ina({carry1[80], carry0[80]}), .inb({p1_80, p0_80}),
+    .rnd(r[161]), .s(s[161]), .clk(clk), .out({t1_80, t0_80}));
+assign carry0[81] = g0_80 ^ t0_80;
+assign carry1[81] = g1_80 ^ t1_80;
+assign sum[160]   = p0_80 ^ carry0[80];
+assign sum[161] = p1_80 ^ carry1[80];
+
+// ---- bit 81 ----
+wire b0_eff_81 = b[162] ^ sub;
+wire p0_81 = a[162]   ^ b0_eff_81;
+wire p1_81 = a[163] ^ b[163];
+wire g0_81, g1_81, t0_81, t1_81;
+MSKand_opini2_d2 u_generate_81 (
+    .ina({a[163], a[162]}), .inb({b[163], b0_eff_81}),
+    .rnd(r[162]), .s(s[162]), .clk(clk), .out({g1_81, g0_81}));
+MSKand_opini2_d2 u_propagate_81 (
+    .ina({carry1[81], carry0[81]}), .inb({p1_81, p0_81}),
+    .rnd(r[163]), .s(s[163]), .clk(clk), .out({t1_81, t0_81}));
+assign carry0[82] = g0_81 ^ t0_81;
+assign carry1[82] = g1_81 ^ t1_81;
+assign sum[162]   = p0_81 ^ carry0[81];
+assign sum[163] = p1_81 ^ carry1[81];
+
+// ---- bit 82 ----
+wire b0_eff_82 = b[164] ^ sub;
+wire p0_82 = a[164]   ^ b0_eff_82;
+wire p1_82 = a[165] ^ b[165];
+wire g0_82, g1_82, t0_82, t1_82;
+MSKand_opini2_d2 u_generate_82 (
+    .ina({a[165], a[164]}), .inb({b[165], b0_eff_82}),
+    .rnd(r[164]), .s(s[164]), .clk(clk), .out({g1_82, g0_82}));
+MSKand_opini2_d2 u_propagate_82 (
+    .ina({carry1[82], carry0[82]}), .inb({p1_82, p0_82}),
+    .rnd(r[165]), .s(s[165]), .clk(clk), .out({t1_82, t0_82}));
+assign carry0[83] = g0_82 ^ t0_82;
+assign carry1[83] = g1_82 ^ t1_82;
+assign sum[164]   = p0_82 ^ carry0[82];
+assign sum[165] = p1_82 ^ carry1[82];
+
+// ---- bit 83 ----
+wire b0_eff_83 = b[166] ^ sub;
+wire p0_83 = a[166]   ^ b0_eff_83;
+wire p1_83 = a[167] ^ b[167];
+wire g0_83, g1_83, t0_83, t1_83;
+MSKand_opini2_d2 u_generate_83 (
+    .ina({a[167], a[166]}), .inb({b[167], b0_eff_83}),
+    .rnd(r[166]), .s(s[166]), .clk(clk), .out({g1_83, g0_83}));
+MSKand_opini2_d2 u_propagate_83 (
+    .ina({carry1[83], carry0[83]}), .inb({p1_83, p0_83}),
+    .rnd(r[167]), .s(s[167]), .clk(clk), .out({t1_83, t0_83}));
+assign carry0[84] = g0_83 ^ t0_83;
+assign carry1[84] = g1_83 ^ t1_83;
+assign sum[166]   = p0_83 ^ carry0[83];
+assign sum[167] = p1_83 ^ carry1[83];
+
+// ---- bit 84 ----
+wire b0_eff_84 = b[168] ^ sub;
+wire p0_84 = a[168]   ^ b0_eff_84;
+wire p1_84 = a[169] ^ b[169];
+wire g0_84, g1_84, t0_84, t1_84;
+MSKand_opini2_d2 u_generate_84 (
+    .ina({a[169], a[168]}), .inb({b[169], b0_eff_84}),
+    .rnd(r[168]), .s(s[168]), .clk(clk), .out({g1_84, g0_84}));
+MSKand_opini2_d2 u_propagate_84 (
+    .ina({carry1[84], carry0[84]}), .inb({p1_84, p0_84}),
+    .rnd(r[169]), .s(s[169]), .clk(clk), .out({t1_84, t0_84}));
+assign carry0[85] = g0_84 ^ t0_84;
+assign carry1[85] = g1_84 ^ t1_84;
+assign sum[168]   = p0_84 ^ carry0[84];
+assign sum[169] = p1_84 ^ carry1[84];
+
+// ---- bit 85 ----
+wire b0_eff_85 = b[170] ^ sub;
+wire p0_85 = a[170]   ^ b0_eff_85;
+wire p1_85 = a[171] ^ b[171];
+wire g0_85, g1_85, t0_85, t1_85;
+MSKand_opini2_d2 u_generate_85 (
+    .ina({a[171], a[170]}), .inb({b[171], b0_eff_85}),
+    .rnd(r[170]), .s(s[170]), .clk(clk), .out({g1_85, g0_85}));
+MSKand_opini2_d2 u_propagate_85 (
+    .ina({carry1[85], carry0[85]}), .inb({p1_85, p0_85}),
+    .rnd(r[171]), .s(s[171]), .clk(clk), .out({t1_85, t0_85}));
+assign carry0[86] = g0_85 ^ t0_85;
+assign carry1[86] = g1_85 ^ t1_85;
+assign sum[170]   = p0_85 ^ carry0[85];
+assign sum[171] = p1_85 ^ carry1[85];
+
+// ---- bit 86 ----
+wire b0_eff_86 = b[172] ^ sub;
+wire p0_86 = a[172]   ^ b0_eff_86;
+wire p1_86 = a[173] ^ b[173];
+wire g0_86, g1_86, t0_86, t1_86;
+MSKand_opini2_d2 u_generate_86 (
+    .ina({a[173], a[172]}), .inb({b[173], b0_eff_86}),
+    .rnd(r[172]), .s(s[172]), .clk(clk), .out({g1_86, g0_86}));
+MSKand_opini2_d2 u_propagate_86 (
+    .ina({carry1[86], carry0[86]}), .inb({p1_86, p0_86}),
+    .rnd(r[173]), .s(s[173]), .clk(clk), .out({t1_86, t0_86}));
+assign carry0[87] = g0_86 ^ t0_86;
+assign carry1[87] = g1_86 ^ t1_86;
+assign sum[172]   = p0_86 ^ carry0[86];
+assign sum[173] = p1_86 ^ carry1[86];
+
+// ---- bit 87 ----
+wire b0_eff_87 = b[174] ^ sub;
+wire p0_87 = a[174]   ^ b0_eff_87;
+wire p1_87 = a[175] ^ b[175];
+wire g0_87, g1_87, t0_87, t1_87;
+MSKand_opini2_d2 u_generate_87 (
+    .ina({a[175], a[174]}), .inb({b[175], b0_eff_87}),
+    .rnd(r[174]), .s(s[174]), .clk(clk), .out({g1_87, g0_87}));
+MSKand_opini2_d2 u_propagate_87 (
+    .ina({carry1[87], carry0[87]}), .inb({p1_87, p0_87}),
+    .rnd(r[175]), .s(s[175]), .clk(clk), .out({t1_87, t0_87}));
+assign carry0[88] = g0_87 ^ t0_87;
+assign carry1[88] = g1_87 ^ t1_87;
+assign sum[174]   = p0_87 ^ carry0[87];
+assign sum[175] = p1_87 ^ carry1[87];
+
+// ---- bit 88 ----
+wire b0_eff_88 = b[176] ^ sub;
+wire p0_88 = a[176]   ^ b0_eff_88;
+wire p1_88 = a[177] ^ b[177];
+wire g0_88, g1_88, t0_88, t1_88;
+MSKand_opini2_d2 u_generate_88 (
+    .ina({a[177], a[176]}), .inb({b[177], b0_eff_88}),
+    .rnd(r[176]), .s(s[176]), .clk(clk), .out({g1_88, g0_88}));
+MSKand_opini2_d2 u_propagate_88 (
+    .ina({carry1[88], carry0[88]}), .inb({p1_88, p0_88}),
+    .rnd(r[177]), .s(s[177]), .clk(clk), .out({t1_88, t0_88}));
+assign carry0[89] = g0_88 ^ t0_88;
+assign carry1[89] = g1_88 ^ t1_88;
+assign sum[176]   = p0_88 ^ carry0[88];
+assign sum[177] = p1_88 ^ carry1[88];
+
+// ---- bit 89 ----
+wire b0_eff_89 = b[178] ^ sub;
+wire p0_89 = a[178]   ^ b0_eff_89;
+wire p1_89 = a[179] ^ b[179];
+wire g0_89, g1_89, t0_89, t1_89;
+MSKand_opini2_d2 u_generate_89 (
+    .ina({a[179], a[178]}), .inb({b[179], b0_eff_89}),
+    .rnd(r[178]), .s(s[178]), .clk(clk), .out({g1_89, g0_89}));
+MSKand_opini2_d2 u_propagate_89 (
+    .ina({carry1[89], carry0[89]}), .inb({p1_89, p0_89}),
+    .rnd(r[179]), .s(s[179]), .clk(clk), .out({t1_89, t0_89}));
+assign carry0[90] = g0_89 ^ t0_89;
+assign carry1[90] = g1_89 ^ t1_89;
+assign sum[178]   = p0_89 ^ carry0[89];
+assign sum[179] = p1_89 ^ carry1[89];
+
+// ---- bit 90 ----
+wire b0_eff_90 = b[180] ^ sub;
+wire p0_90 = a[180]   ^ b0_eff_90;
+wire p1_90 = a[181] ^ b[181];
+wire g0_90, g1_90, t0_90, t1_90;
+MSKand_opini2_d2 u_generate_90 (
+    .ina({a[181], a[180]}), .inb({b[181], b0_eff_90}),
+    .rnd(r[180]), .s(s[180]), .clk(clk), .out({g1_90, g0_90}));
+MSKand_opini2_d2 u_propagate_90 (
+    .ina({carry1[90], carry0[90]}), .inb({p1_90, p0_90}),
+    .rnd(r[181]), .s(s[181]), .clk(clk), .out({t1_90, t0_90}));
+assign carry0[91] = g0_90 ^ t0_90;
+assign carry1[91] = g1_90 ^ t1_90;
+assign sum[180]   = p0_90 ^ carry0[90];
+assign sum[181] = p1_90 ^ carry1[90];
+
+// ---- bit 91 ----
+wire b0_eff_91 = b[182] ^ sub;
+wire p0_91 = a[182]   ^ b0_eff_91;
+wire p1_91 = a[183] ^ b[183];
+wire g0_91, g1_91, t0_91, t1_91;
+MSKand_opini2_d2 u_generate_91 (
+    .ina({a[183], a[182]}), .inb({b[183], b0_eff_91}),
+    .rnd(r[182]), .s(s[182]), .clk(clk), .out({g1_91, g0_91}));
+MSKand_opini2_d2 u_propagate_91 (
+    .ina({carry1[91], carry0[91]}), .inb({p1_91, p0_91}),
+    .rnd(r[183]), .s(s[183]), .clk(clk), .out({t1_91, t0_91}));
+assign carry0[92] = g0_91 ^ t0_91;
+assign carry1[92] = g1_91 ^ t1_91;
+assign sum[182]   = p0_91 ^ carry0[91];
+assign sum[183] = p1_91 ^ carry1[91];
+
+// ---- bit 92 ----
+wire b0_eff_92 = b[184] ^ sub;
+wire p0_92 = a[184]   ^ b0_eff_92;
+wire p1_92 = a[185] ^ b[185];
+wire g0_92, g1_92, t0_92, t1_92;
+MSKand_opini2_d2 u_generate_92 (
+    .ina({a[185], a[184]}), .inb({b[185], b0_eff_92}),
+    .rnd(r[184]), .s(s[184]), .clk(clk), .out({g1_92, g0_92}));
+MSKand_opini2_d2 u_propagate_92 (
+    .ina({carry1[92], carry0[92]}), .inb({p1_92, p0_92}),
+    .rnd(r[185]), .s(s[185]), .clk(clk), .out({t1_92, t0_92}));
+assign carry0[93] = g0_92 ^ t0_92;
+assign carry1[93] = g1_92 ^ t1_92;
+assign sum[184]   = p0_92 ^ carry0[92];
+assign sum[185] = p1_92 ^ carry1[92];
+
+// ---- bit 93 ----
+wire b0_eff_93 = b[186] ^ sub;
+wire p0_93 = a[186]   ^ b0_eff_93;
+wire p1_93 = a[187] ^ b[187];
+wire g0_93, g1_93, t0_93, t1_93;
+MSKand_opini2_d2 u_generate_93 (
+    .ina({a[187], a[186]}), .inb({b[187], b0_eff_93}),
+    .rnd(r[186]), .s(s[186]), .clk(clk), .out({g1_93, g0_93}));
+MSKand_opini2_d2 u_propagate_93 (
+    .ina({carry1[93], carry0[93]}), .inb({p1_93, p0_93}),
+    .rnd(r[187]), .s(s[187]), .clk(clk), .out({t1_93, t0_93}));
+assign carry0[94] = g0_93 ^ t0_93;
+assign carry1[94] = g1_93 ^ t1_93;
+assign sum[186]   = p0_93 ^ carry0[93];
+assign sum[187] = p1_93 ^ carry1[93];
+
+// ---- bit 94 ----
+wire b0_eff_94 = b[188] ^ sub;
+wire p0_94 = a[188]   ^ b0_eff_94;
+wire p1_94 = a[189] ^ b[189];
+wire g0_94, g1_94, t0_94, t1_94;
+MSKand_opini2_d2 u_generate_94 (
+    .ina({a[189], a[188]}), .inb({b[189], b0_eff_94}),
+    .rnd(r[188]), .s(s[188]), .clk(clk), .out({g1_94, g0_94}));
+MSKand_opini2_d2 u_propagate_94 (
+    .ina({carry1[94], carry0[94]}), .inb({p1_94, p0_94}),
+    .rnd(r[189]), .s(s[189]), .clk(clk), .out({t1_94, t0_94}));
+assign carry0[95] = g0_94 ^ t0_94;
+assign carry1[95] = g1_94 ^ t1_94;
+assign sum[188]   = p0_94 ^ carry0[94];
+assign sum[189] = p1_94 ^ carry1[94];
+
+// ---- bit 95 ----
+wire b0_eff_95 = b[190] ^ sub;
+wire p0_95 = a[190]   ^ b0_eff_95;
+wire p1_95 = a[191] ^ b[191];
+wire g0_95, g1_95, t0_95, t1_95;
+MSKand_opini2_d2 u_generate_95 (
+    .ina({a[191], a[190]}), .inb({b[191], b0_eff_95}),
+    .rnd(r[190]), .s(s[190]), .clk(clk), .out({g1_95, g0_95}));
+MSKand_opini2_d2 u_propagate_95 (
+    .ina({carry1[95], carry0[95]}), .inb({p1_95, p0_95}),
+    .rnd(r[191]), .s(s[191]), .clk(clk), .out({t1_95, t0_95}));
+assign carry0[96] = g0_95 ^ t0_95;
+assign carry1[96] = g1_95 ^ t1_95;
+assign sum[190]   = p0_95 ^ carry0[95];
+assign sum[191] = p1_95 ^ carry1[95];
+
+// ---- bit 96 ----
+wire b0_eff_96 = b[192] ^ sub;
+wire p0_96 = a[192]   ^ b0_eff_96;
+wire p1_96 = a[193] ^ b[193];
+wire g0_96, g1_96, t0_96, t1_96;
+MSKand_opini2_d2 u_generate_96 (
+    .ina({a[193], a[192]}), .inb({b[193], b0_eff_96}),
+    .rnd(r[192]), .s(s[192]), .clk(clk), .out({g1_96, g0_96}));
+MSKand_opini2_d2 u_propagate_96 (
+    .ina({carry1[96], carry0[96]}), .inb({p1_96, p0_96}),
+    .rnd(r[193]), .s(s[193]), .clk(clk), .out({t1_96, t0_96}));
+assign carry0[97] = g0_96 ^ t0_96;
+assign carry1[97] = g1_96 ^ t1_96;
+assign sum[192]   = p0_96 ^ carry0[96];
+assign sum[193] = p1_96 ^ carry1[96];
+
+// ---- bit 97 ----
+wire b0_eff_97 = b[194] ^ sub;
+wire p0_97 = a[194]   ^ b0_eff_97;
+wire p1_97 = a[195] ^ b[195];
+wire g0_97, g1_97, t0_97, t1_97;
+MSKand_opini2_d2 u_generate_97 (
+    .ina({a[195], a[194]}), .inb({b[195], b0_eff_97}),
+    .rnd(r[194]), .s(s[194]), .clk(clk), .out({g1_97, g0_97}));
+MSKand_opini2_d2 u_propagate_97 (
+    .ina({carry1[97], carry0[97]}), .inb({p1_97, p0_97}),
+    .rnd(r[195]), .s(s[195]), .clk(clk), .out({t1_97, t0_97}));
+assign carry0[98] = g0_97 ^ t0_97;
+assign carry1[98] = g1_97 ^ t1_97;
+assign sum[194]   = p0_97 ^ carry0[97];
+assign sum[195] = p1_97 ^ carry1[97];
+
+// ---- bit 98 ----
+wire b0_eff_98 = b[196] ^ sub;
+wire p0_98 = a[196]   ^ b0_eff_98;
+wire p1_98 = a[197] ^ b[197];
+wire g0_98, g1_98, t0_98, t1_98;
+MSKand_opini2_d2 u_generate_98 (
+    .ina({a[197], a[196]}), .inb({b[197], b0_eff_98}),
+    .rnd(r[196]), .s(s[196]), .clk(clk), .out({g1_98, g0_98}));
+MSKand_opini2_d2 u_propagate_98 (
+    .ina({carry1[98], carry0[98]}), .inb({p1_98, p0_98}),
+    .rnd(r[197]), .s(s[197]), .clk(clk), .out({t1_98, t0_98}));
+assign carry0[99] = g0_98 ^ t0_98;
+assign carry1[99] = g1_98 ^ t1_98;
+assign sum[196]   = p0_98 ^ carry0[98];
+assign sum[197] = p1_98 ^ carry1[98];
+
+// ---- bit 99 ----
+wire b0_eff_99 = b[198] ^ sub;
+wire p0_99 = a[198]   ^ b0_eff_99;
+wire p1_99 = a[199] ^ b[199];
+wire g0_99, g1_99, t0_99, t1_99;
+MSKand_opini2_d2 u_generate_99 (
+    .ina({a[199], a[198]}), .inb({b[199], b0_eff_99}),
+    .rnd(r[198]), .s(s[198]), .clk(clk), .out({g1_99, g0_99}));
+MSKand_opini2_d2 u_propagate_99 (
+    .ina({carry1[99], carry0[99]}), .inb({p1_99, p0_99}),
+    .rnd(r[199]), .s(s[199]), .clk(clk), .out({t1_99, t0_99}));
+assign carry0[100] = g0_99 ^ t0_99;
+assign carry1[100] = g1_99 ^ t1_99;
+assign sum[198]   = p0_99 ^ carry0[99];
+assign sum[199] = p1_99 ^ carry1[99];
+
+// ---- bit 100 ----
+wire b0_eff_100 = b[200] ^ sub;
+wire p0_100 = a[200]   ^ b0_eff_100;
+wire p1_100 = a[201] ^ b[201];
+wire g0_100, g1_100, t0_100, t1_100;
+MSKand_opini2_d2 u_generate_100 (
+    .ina({a[201], a[200]}), .inb({b[201], b0_eff_100}),
+    .rnd(r[200]), .s(s[200]), .clk(clk), .out({g1_100, g0_100}));
+MSKand_opini2_d2 u_propagate_100 (
+    .ina({carry1[100], carry0[100]}), .inb({p1_100, p0_100}),
+    .rnd(r[201]), .s(s[201]), .clk(clk), .out({t1_100, t0_100}));
+assign carry0[101] = g0_100 ^ t0_100;
+assign carry1[101] = g1_100 ^ t1_100;
+assign sum[200]   = p0_100 ^ carry0[100];
+assign sum[201] = p1_100 ^ carry1[100];
+
+// ---- bit 101 ----
+wire b0_eff_101 = b[202] ^ sub;
+wire p0_101 = a[202]   ^ b0_eff_101;
+wire p1_101 = a[203] ^ b[203];
+wire g0_101, g1_101, t0_101, t1_101;
+MSKand_opini2_d2 u_generate_101 (
+    .ina({a[203], a[202]}), .inb({b[203], b0_eff_101}),
+    .rnd(r[202]), .s(s[202]), .clk(clk), .out({g1_101, g0_101}));
+MSKand_opini2_d2 u_propagate_101 (
+    .ina({carry1[101], carry0[101]}), .inb({p1_101, p0_101}),
+    .rnd(r[203]), .s(s[203]), .clk(clk), .out({t1_101, t0_101}));
+assign carry0[102] = g0_101 ^ t0_101;
+assign carry1[102] = g1_101 ^ t1_101;
+assign sum[202]   = p0_101 ^ carry0[101];
+assign sum[203] = p1_101 ^ carry1[101];
+
+// ---- bit 102 ----
+wire b0_eff_102 = b[204] ^ sub;
+wire p0_102 = a[204]   ^ b0_eff_102;
+wire p1_102 = a[205] ^ b[205];
+wire g0_102, g1_102, t0_102, t1_102;
+MSKand_opini2_d2 u_generate_102 (
+    .ina({a[205], a[204]}), .inb({b[205], b0_eff_102}),
+    .rnd(r[204]), .s(s[204]), .clk(clk), .out({g1_102, g0_102}));
+MSKand_opini2_d2 u_propagate_102 (
+    .ina({carry1[102], carry0[102]}), .inb({p1_102, p0_102}),
+    .rnd(r[205]), .s(s[205]), .clk(clk), .out({t1_102, t0_102}));
+assign carry0[103] = g0_102 ^ t0_102;
+assign carry1[103] = g1_102 ^ t1_102;
+assign sum[204]   = p0_102 ^ carry0[102];
+assign sum[205] = p1_102 ^ carry1[102];
+
+// ---- bit 103 ----
+wire b0_eff_103 = b[206] ^ sub;
+wire p0_103 = a[206]   ^ b0_eff_103;
+wire p1_103 = a[207] ^ b[207];
+wire g0_103, g1_103, t0_103, t1_103;
+MSKand_opini2_d2 u_generate_103 (
+    .ina({a[207], a[206]}), .inb({b[207], b0_eff_103}),
+    .rnd(r[206]), .s(s[206]), .clk(clk), .out({g1_103, g0_103}));
+MSKand_opini2_d2 u_propagate_103 (
+    .ina({carry1[103], carry0[103]}), .inb({p1_103, p0_103}),
+    .rnd(r[207]), .s(s[207]), .clk(clk), .out({t1_103, t0_103}));
+assign carry0[104] = g0_103 ^ t0_103;
+assign carry1[104] = g1_103 ^ t1_103;
+assign sum[206]   = p0_103 ^ carry0[103];
+assign sum[207] = p1_103 ^ carry1[103];
+
+// ---- bit 104 ----
+wire b0_eff_104 = b[208] ^ sub;
+wire p0_104 = a[208]   ^ b0_eff_104;
+wire p1_104 = a[209] ^ b[209];
+wire g0_104, g1_104, t0_104, t1_104;
+MSKand_opini2_d2 u_generate_104 (
+    .ina({a[209], a[208]}), .inb({b[209], b0_eff_104}),
+    .rnd(r[208]), .s(s[208]), .clk(clk), .out({g1_104, g0_104}));
+MSKand_opini2_d2 u_propagate_104 (
+    .ina({carry1[104], carry0[104]}), .inb({p1_104, p0_104}),
+    .rnd(r[209]), .s(s[209]), .clk(clk), .out({t1_104, t0_104}));
+assign carry0[105] = g0_104 ^ t0_104;
+assign carry1[105] = g1_104 ^ t1_104;
+assign sum[208]   = p0_104 ^ carry0[104];
+assign sum[209] = p1_104 ^ carry1[104];
+
+// ---- bit 105 ----
+wire b0_eff_105 = b[210] ^ sub;
+wire p0_105 = a[210]   ^ b0_eff_105;
+wire p1_105 = a[211] ^ b[211];
+wire g0_105, g1_105, t0_105, t1_105;
+MSKand_opini2_d2 u_generate_105 (
+    .ina({a[211], a[210]}), .inb({b[211], b0_eff_105}),
+    .rnd(r[210]), .s(s[210]), .clk(clk), .out({g1_105, g0_105}));
+MSKand_opini2_d2 u_propagate_105 (
+    .ina({carry1[105], carry0[105]}), .inb({p1_105, p0_105}),
+    .rnd(r[211]), .s(s[211]), .clk(clk), .out({t1_105, t0_105}));
+assign carry0[106] = g0_105 ^ t0_105;
+assign carry1[106] = g1_105 ^ t1_105;
+assign sum[210]   = p0_105 ^ carry0[105];
+assign sum[211] = p1_105 ^ carry1[105];
+
+// ---- bit 106 ----
+wire b0_eff_106 = b[212] ^ sub;
+wire p0_106 = a[212]   ^ b0_eff_106;
+wire p1_106 = a[213] ^ b[213];
+wire g0_106, g1_106, t0_106, t1_106;
+MSKand_opini2_d2 u_generate_106 (
+    .ina({a[213], a[212]}), .inb({b[213], b0_eff_106}),
+    .rnd(r[212]), .s(s[212]), .clk(clk), .out({g1_106, g0_106}));
+MSKand_opini2_d2 u_propagate_106 (
+    .ina({carry1[106], carry0[106]}), .inb({p1_106, p0_106}),
+    .rnd(r[213]), .s(s[213]), .clk(clk), .out({t1_106, t0_106}));
+assign carry0[107] = g0_106 ^ t0_106;
+assign carry1[107] = g1_106 ^ t1_106;
+assign sum[212]   = p0_106 ^ carry0[106];
+assign sum[213] = p1_106 ^ carry1[106];
+
+// ---- bit 107 ----
+wire b0_eff_107 = b[214] ^ sub;
+wire p0_107 = a[214]   ^ b0_eff_107;
+wire p1_107 = a[215] ^ b[215];
+wire g0_107, g1_107, t0_107, t1_107;
+MSKand_opini2_d2 u_generate_107 (
+    .ina({a[215], a[214]}), .inb({b[215], b0_eff_107}),
+    .rnd(r[214]), .s(s[214]), .clk(clk), .out({g1_107, g0_107}));
+MSKand_opini2_d2 u_propagate_107 (
+    .ina({carry1[107], carry0[107]}), .inb({p1_107, p0_107}),
+    .rnd(r[215]), .s(s[215]), .clk(clk), .out({t1_107, t0_107}));
+assign carry0[108] = g0_107 ^ t0_107;
+assign carry1[108] = g1_107 ^ t1_107;
+assign sum[214]   = p0_107 ^ carry0[107];
+assign sum[215] = p1_107 ^ carry1[107];
+
+// ---- bit 108 ----
+wire b0_eff_108 = b[216] ^ sub;
+wire p0_108 = a[216]   ^ b0_eff_108;
+wire p1_108 = a[217] ^ b[217];
+wire g0_108, g1_108, t0_108, t1_108;
+MSKand_opini2_d2 u_generate_108 (
+    .ina({a[217], a[216]}), .inb({b[217], b0_eff_108}),
+    .rnd(r[216]), .s(s[216]), .clk(clk), .out({g1_108, g0_108}));
+MSKand_opini2_d2 u_propagate_108 (
+    .ina({carry1[108], carry0[108]}), .inb({p1_108, p0_108}),
+    .rnd(r[217]), .s(s[217]), .clk(clk), .out({t1_108, t0_108}));
+assign carry0[109] = g0_108 ^ t0_108;
+assign carry1[109] = g1_108 ^ t1_108;
+assign sum[216]   = p0_108 ^ carry0[108];
+assign sum[217] = p1_108 ^ carry1[108];
+
+// ---- bit 109 ----
+wire b0_eff_109 = b[218] ^ sub;
+wire p0_109 = a[218]   ^ b0_eff_109;
+wire p1_109 = a[219] ^ b[219];
+wire g0_109, g1_109, t0_109, t1_109;
+MSKand_opini2_d2 u_generate_109 (
+    .ina({a[219], a[218]}), .inb({b[219], b0_eff_109}),
+    .rnd(r[218]), .s(s[218]), .clk(clk), .out({g1_109, g0_109}));
+MSKand_opini2_d2 u_propagate_109 (
+    .ina({carry1[109], carry0[109]}), .inb({p1_109, p0_109}),
+    .rnd(r[219]), .s(s[219]), .clk(clk), .out({t1_109, t0_109}));
+assign carry0[110] = g0_109 ^ t0_109;
+assign carry1[110] = g1_109 ^ t1_109;
+assign sum[218]   = p0_109 ^ carry0[109];
+assign sum[219] = p1_109 ^ carry1[109];
+
+// ---- bit 110 ----
+wire b0_eff_110 = b[220] ^ sub;
+wire p0_110 = a[220]   ^ b0_eff_110;
+wire p1_110 = a[221] ^ b[221];
+wire g0_110, g1_110, t0_110, t1_110;
+MSKand_opini2_d2 u_generate_110 (
+    .ina({a[221], a[220]}), .inb({b[221], b0_eff_110}),
+    .rnd(r[220]), .s(s[220]), .clk(clk), .out({g1_110, g0_110}));
+MSKand_opini2_d2 u_propagate_110 (
+    .ina({carry1[110], carry0[110]}), .inb({p1_110, p0_110}),
+    .rnd(r[221]), .s(s[221]), .clk(clk), .out({t1_110, t0_110}));
+assign carry0[111] = g0_110 ^ t0_110;
+assign carry1[111] = g1_110 ^ t1_110;
+assign sum[220]   = p0_110 ^ carry0[110];
+assign sum[221] = p1_110 ^ carry1[110];
+
+// ---- bit 111 ----
+wire b0_eff_111 = b[222] ^ sub;
+wire p0_111 = a[222]   ^ b0_eff_111;
+wire p1_111 = a[223] ^ b[223];
+wire g0_111, g1_111, t0_111, t1_111;
+MSKand_opini2_d2 u_generate_111 (
+    .ina({a[223], a[222]}), .inb({b[223], b0_eff_111}),
+    .rnd(r[222]), .s(s[222]), .clk(clk), .out({g1_111, g0_111}));
+MSKand_opini2_d2 u_propagate_111 (
+    .ina({carry1[111], carry0[111]}), .inb({p1_111, p0_111}),
+    .rnd(r[223]), .s(s[223]), .clk(clk), .out({t1_111, t0_111}));
+assign carry0[112] = g0_111 ^ t0_111;
+assign carry1[112] = g1_111 ^ t1_111;
+assign sum[222]   = p0_111 ^ carry0[111];
+assign sum[223] = p1_111 ^ carry1[111];
+
+// ---- bit 112 ----
+wire b0_eff_112 = b[224] ^ sub;
+wire p0_112 = a[224]   ^ b0_eff_112;
+wire p1_112 = a[225] ^ b[225];
+wire g0_112, g1_112, t0_112, t1_112;
+MSKand_opini2_d2 u_generate_112 (
+    .ina({a[225], a[224]}), .inb({b[225], b0_eff_112}),
+    .rnd(r[224]), .s(s[224]), .clk(clk), .out({g1_112, g0_112}));
+MSKand_opini2_d2 u_propagate_112 (
+    .ina({carry1[112], carry0[112]}), .inb({p1_112, p0_112}),
+    .rnd(r[225]), .s(s[225]), .clk(clk), .out({t1_112, t0_112}));
+assign carry0[113] = g0_112 ^ t0_112;
+assign carry1[113] = g1_112 ^ t1_112;
+assign sum[224]   = p0_112 ^ carry0[112];
+assign sum[225] = p1_112 ^ carry1[112];
+
+// ---- bit 113 ----
+wire b0_eff_113 = b[226] ^ sub;
+wire p0_113 = a[226]   ^ b0_eff_113;
+wire p1_113 = a[227] ^ b[227];
+wire g0_113, g1_113, t0_113, t1_113;
+MSKand_opini2_d2 u_generate_113 (
+    .ina({a[227], a[226]}), .inb({b[227], b0_eff_113}),
+    .rnd(r[226]), .s(s[226]), .clk(clk), .out({g1_113, g0_113}));
+MSKand_opini2_d2 u_propagate_113 (
+    .ina({carry1[113], carry0[113]}), .inb({p1_113, p0_113}),
+    .rnd(r[227]), .s(s[227]), .clk(clk), .out({t1_113, t0_113}));
+assign carry0[114] = g0_113 ^ t0_113;
+assign carry1[114] = g1_113 ^ t1_113;
+assign sum[226]   = p0_113 ^ carry0[113];
+assign sum[227] = p1_113 ^ carry1[113];
+
+// ---- bit 114 ----
+wire b0_eff_114 = b[228] ^ sub;
+wire p0_114 = a[228]   ^ b0_eff_114;
+wire p1_114 = a[229] ^ b[229];
+wire g0_114, g1_114, t0_114, t1_114;
+MSKand_opini2_d2 u_generate_114 (
+    .ina({a[229], a[228]}), .inb({b[229], b0_eff_114}),
+    .rnd(r[228]), .s(s[228]), .clk(clk), .out({g1_114, g0_114}));
+MSKand_opini2_d2 u_propagate_114 (
+    .ina({carry1[114], carry0[114]}), .inb({p1_114, p0_114}),
+    .rnd(r[229]), .s(s[229]), .clk(clk), .out({t1_114, t0_114}));
+assign carry0[115] = g0_114 ^ t0_114;
+assign carry1[115] = g1_114 ^ t1_114;
+assign sum[228]   = p0_114 ^ carry0[114];
+assign sum[229] = p1_114 ^ carry1[114];
+
+// ---- bit 115 ----
+wire b0_eff_115 = b[230] ^ sub;
+wire p0_115 = a[230]   ^ b0_eff_115;
+wire p1_115 = a[231] ^ b[231];
+wire g0_115, g1_115, t0_115, t1_115;
+MSKand_opini2_d2 u_generate_115 (
+    .ina({a[231], a[230]}), .inb({b[231], b0_eff_115}),
+    .rnd(r[230]), .s(s[230]), .clk(clk), .out({g1_115, g0_115}));
+MSKand_opini2_d2 u_propagate_115 (
+    .ina({carry1[115], carry0[115]}), .inb({p1_115, p0_115}),
+    .rnd(r[231]), .s(s[231]), .clk(clk), .out({t1_115, t0_115}));
+assign carry0[116] = g0_115 ^ t0_115;
+assign carry1[116] = g1_115 ^ t1_115;
+assign sum[230]   = p0_115 ^ carry0[115];
+assign sum[231] = p1_115 ^ carry1[115];
+
+// ---- bit 116 ----
+wire b0_eff_116 = b[232] ^ sub;
+wire p0_116 = a[232]   ^ b0_eff_116;
+wire p1_116 = a[233] ^ b[233];
+wire g0_116, g1_116, t0_116, t1_116;
+MSKand_opini2_d2 u_generate_116 (
+    .ina({a[233], a[232]}), .inb({b[233], b0_eff_116}),
+    .rnd(r[232]), .s(s[232]), .clk(clk), .out({g1_116, g0_116}));
+MSKand_opini2_d2 u_propagate_116 (
+    .ina({carry1[116], carry0[116]}), .inb({p1_116, p0_116}),
+    .rnd(r[233]), .s(s[233]), .clk(clk), .out({t1_116, t0_116}));
+assign carry0[117] = g0_116 ^ t0_116;
+assign carry1[117] = g1_116 ^ t1_116;
+assign sum[232]   = p0_116 ^ carry0[116];
+assign sum[233] = p1_116 ^ carry1[116];
+
+// ---- bit 117 ----
+wire b0_eff_117 = b[234] ^ sub;
+wire p0_117 = a[234]   ^ b0_eff_117;
+wire p1_117 = a[235] ^ b[235];
+wire g0_117, g1_117, t0_117, t1_117;
+MSKand_opini2_d2 u_generate_117 (
+    .ina({a[235], a[234]}), .inb({b[235], b0_eff_117}),
+    .rnd(r[234]), .s(s[234]), .clk(clk), .out({g1_117, g0_117}));
+MSKand_opini2_d2 u_propagate_117 (
+    .ina({carry1[117], carry0[117]}), .inb({p1_117, p0_117}),
+    .rnd(r[235]), .s(s[235]), .clk(clk), .out({t1_117, t0_117}));
+assign carry0[118] = g0_117 ^ t0_117;
+assign carry1[118] = g1_117 ^ t1_117;
+assign sum[234]   = p0_117 ^ carry0[117];
+assign sum[235] = p1_117 ^ carry1[117];
+
+// ---- bit 118 ----
+wire b0_eff_118 = b[236] ^ sub;
+wire p0_118 = a[236]   ^ b0_eff_118;
+wire p1_118 = a[237] ^ b[237];
+wire g0_118, g1_118, t0_118, t1_118;
+MSKand_opini2_d2 u_generate_118 (
+    .ina({a[237], a[236]}), .inb({b[237], b0_eff_118}),
+    .rnd(r[236]), .s(s[236]), .clk(clk), .out({g1_118, g0_118}));
+MSKand_opini2_d2 u_propagate_118 (
+    .ina({carry1[118], carry0[118]}), .inb({p1_118, p0_118}),
+    .rnd(r[237]), .s(s[237]), .clk(clk), .out({t1_118, t0_118}));
+assign carry0[119] = g0_118 ^ t0_118;
+assign carry1[119] = g1_118 ^ t1_118;
+assign sum[236]   = p0_118 ^ carry0[118];
+assign sum[237] = p1_118 ^ carry1[118];
+
+// ---- bit 119 ----
+wire b0_eff_119 = b[238] ^ sub;
+wire p0_119 = a[238]   ^ b0_eff_119;
+wire p1_119 = a[239] ^ b[239];
+wire g0_119, g1_119, t0_119, t1_119;
+MSKand_opini2_d2 u_generate_119 (
+    .ina({a[239], a[238]}), .inb({b[239], b0_eff_119}),
+    .rnd(r[238]), .s(s[238]), .clk(clk), .out({g1_119, g0_119}));
+MSKand_opini2_d2 u_propagate_119 (
+    .ina({carry1[119], carry0[119]}), .inb({p1_119, p0_119}),
+    .rnd(r[239]), .s(s[239]), .clk(clk), .out({t1_119, t0_119}));
+assign carry0[120] = g0_119 ^ t0_119;
+assign carry1[120] = g1_119 ^ t1_119;
+assign sum[238]   = p0_119 ^ carry0[119];
+assign sum[239] = p1_119 ^ carry1[119];
+
+// ---- bit 120 ----
+wire b0_eff_120 = b[240] ^ sub;
+wire p0_120 = a[240]   ^ b0_eff_120;
+wire p1_120 = a[241] ^ b[241];
+wire g0_120, g1_120, t0_120, t1_120;
+MSKand_opini2_d2 u_generate_120 (
+    .ina({a[241], a[240]}), .inb({b[241], b0_eff_120}),
+    .rnd(r[240]), .s(s[240]), .clk(clk), .out({g1_120, g0_120}));
+MSKand_opini2_d2 u_propagate_120 (
+    .ina({carry1[120], carry0[120]}), .inb({p1_120, p0_120}),
+    .rnd(r[241]), .s(s[241]), .clk(clk), .out({t1_120, t0_120}));
+assign carry0[121] = g0_120 ^ t0_120;
+assign carry1[121] = g1_120 ^ t1_120;
+assign sum[240]   = p0_120 ^ carry0[120];
+assign sum[241] = p1_120 ^ carry1[120];
+
+// ---- bit 121 ----
+wire b0_eff_121 = b[242] ^ sub;
+wire p0_121 = a[242]   ^ b0_eff_121;
+wire p1_121 = a[243] ^ b[243];
+wire g0_121, g1_121, t0_121, t1_121;
+MSKand_opini2_d2 u_generate_121 (
+    .ina({a[243], a[242]}), .inb({b[243], b0_eff_121}),
+    .rnd(r[242]), .s(s[242]), .clk(clk), .out({g1_121, g0_121}));
+MSKand_opini2_d2 u_propagate_121 (
+    .ina({carry1[121], carry0[121]}), .inb({p1_121, p0_121}),
+    .rnd(r[243]), .s(s[243]), .clk(clk), .out({t1_121, t0_121}));
+assign carry0[122] = g0_121 ^ t0_121;
+assign carry1[122] = g1_121 ^ t1_121;
+assign sum[242]   = p0_121 ^ carry0[121];
+assign sum[243] = p1_121 ^ carry1[121];
+
+// ---- bit 122 ----
+wire b0_eff_122 = b[244] ^ sub;
+wire p0_122 = a[244]   ^ b0_eff_122;
+wire p1_122 = a[245] ^ b[245];
+wire g0_122, g1_122, t0_122, t1_122;
+MSKand_opini2_d2 u_generate_122 (
+    .ina({a[245], a[244]}), .inb({b[245], b0_eff_122}),
+    .rnd(r[244]), .s(s[244]), .clk(clk), .out({g1_122, g0_122}));
+MSKand_opini2_d2 u_propagate_122 (
+    .ina({carry1[122], carry0[122]}), .inb({p1_122, p0_122}),
+    .rnd(r[245]), .s(s[245]), .clk(clk), .out({t1_122, t0_122}));
+assign carry0[123] = g0_122 ^ t0_122;
+assign carry1[123] = g1_122 ^ t1_122;
+assign sum[244]   = p0_122 ^ carry0[122];
+assign sum[245] = p1_122 ^ carry1[122];
+
+// ---- bit 123 ----
+wire b0_eff_123 = b[246] ^ sub;
+wire p0_123 = a[246]   ^ b0_eff_123;
+wire p1_123 = a[247] ^ b[247];
+wire g0_123, g1_123, t0_123, t1_123;
+MSKand_opini2_d2 u_generate_123 (
+    .ina({a[247], a[246]}), .inb({b[247], b0_eff_123}),
+    .rnd(r[246]), .s(s[246]), .clk(clk), .out({g1_123, g0_123}));
+MSKand_opini2_d2 u_propagate_123 (
+    .ina({carry1[123], carry0[123]}), .inb({p1_123, p0_123}),
+    .rnd(r[247]), .s(s[247]), .clk(clk), .out({t1_123, t0_123}));
+assign carry0[124] = g0_123 ^ t0_123;
+assign carry1[124] = g1_123 ^ t1_123;
+assign sum[246]   = p0_123 ^ carry0[123];
+assign sum[247] = p1_123 ^ carry1[123];
+
+// ---- bit 124 ----
+wire b0_eff_124 = b[248] ^ sub;
+wire p0_124 = a[248]   ^ b0_eff_124;
+wire p1_124 = a[249] ^ b[249];
+wire g0_124, g1_124, t0_124, t1_124;
+MSKand_opini2_d2 u_generate_124 (
+    .ina({a[249], a[248]}), .inb({b[249], b0_eff_124}),
+    .rnd(r[248]), .s(s[248]), .clk(clk), .out({g1_124, g0_124}));
+MSKand_opini2_d2 u_propagate_124 (
+    .ina({carry1[124], carry0[124]}), .inb({p1_124, p0_124}),
+    .rnd(r[249]), .s(s[249]), .clk(clk), .out({t1_124, t0_124}));
+assign carry0[125] = g0_124 ^ t0_124;
+assign carry1[125] = g1_124 ^ t1_124;
+assign sum[248]   = p0_124 ^ carry0[124];
+assign sum[249] = p1_124 ^ carry1[124];
+
+// ---- bit 125 ----
+wire b0_eff_125 = b[250] ^ sub;
+wire p0_125 = a[250]   ^ b0_eff_125;
+wire p1_125 = a[251] ^ b[251];
+wire g0_125, g1_125, t0_125, t1_125;
+MSKand_opini2_d2 u_generate_125 (
+    .ina({a[251], a[250]}), .inb({b[251], b0_eff_125}),
+    .rnd(r[250]), .s(s[250]), .clk(clk), .out({g1_125, g0_125}));
+MSKand_opini2_d2 u_propagate_125 (
+    .ina({carry1[125], carry0[125]}), .inb({p1_125, p0_125}),
+    .rnd(r[251]), .s(s[251]), .clk(clk), .out({t1_125, t0_125}));
+assign carry0[126] = g0_125 ^ t0_125;
+assign carry1[126] = g1_125 ^ t1_125;
+assign sum[250]   = p0_125 ^ carry0[125];
+assign sum[251] = p1_125 ^ carry1[125];
+
+// ---- bit 126 ----
+wire b0_eff_126 = b[252] ^ sub;
+wire p0_126 = a[252]   ^ b0_eff_126;
+wire p1_126 = a[253] ^ b[253];
+wire g0_126, g1_126, t0_126, t1_126;
+MSKand_opini2_d2 u_generate_126 (
+    .ina({a[253], a[252]}), .inb({b[253], b0_eff_126}),
+    .rnd(r[252]), .s(s[252]), .clk(clk), .out({g1_126, g0_126}));
+MSKand_opini2_d2 u_propagate_126 (
+    .ina({carry1[126], carry0[126]}), .inb({p1_126, p0_126}),
+    .rnd(r[253]), .s(s[253]), .clk(clk), .out({t1_126, t0_126}));
+assign carry0[127] = g0_126 ^ t0_126;
+assign carry1[127] = g1_126 ^ t1_126;
+assign sum[252]   = p0_126 ^ carry0[126];
+assign sum[253] = p1_126 ^ carry1[126];
+
+// ---- bit 127 ----
+wire b0_eff_127 = b[254] ^ sub;
+wire p0_127 = a[254]   ^ b0_eff_127;
+wire p1_127 = a[255] ^ b[255];
+wire g0_127, g1_127, t0_127, t1_127;
+MSKand_opini2_d2 u_generate_127 (
+    .ina({a[255], a[254]}), .inb({b[255], b0_eff_127}),
+    .rnd(r[254]), .s(s[254]), .clk(clk), .out({g1_127, g0_127}));
+MSKand_opini2_d2 u_propagate_127 (
+    .ina({carry1[127], carry0[127]}), .inb({p1_127, p0_127}),
+    .rnd(r[255]), .s(s[255]), .clk(clk), .out({t1_127, t0_127}));
+assign carry0[128] = g0_127 ^ t0_127;
+assign carry1[128] = g1_127 ^ t1_127;
+assign sum[254]   = p0_127 ^ carry0[127];
+assign sum[255] = p1_127 ^ carry1[127];
+
+// ---- bit 128 ----
+wire b0_eff_128 = b[256] ^ sub;
+wire p0_128 = a[256]   ^ b0_eff_128;
+wire p1_128 = a[257] ^ b[257];
+wire g0_128, g1_128, t0_128, t1_128;
+MSKand_opini2_d2 u_generate_128 (
+    .ina({a[257], a[256]}), .inb({b[257], b0_eff_128}),
+    .rnd(r[256]), .s(s[256]), .clk(clk), .out({g1_128, g0_128}));
+MSKand_opini2_d2 u_propagate_128 (
+    .ina({carry1[128], carry0[128]}), .inb({p1_128, p0_128}),
+    .rnd(r[257]), .s(s[257]), .clk(clk), .out({t1_128, t0_128}));
+assign carry0[129] = g0_128 ^ t0_128;
+assign carry1[129] = g1_128 ^ t1_128;
+assign sum[256]   = p0_128 ^ carry0[128];
+assign sum[257] = p1_128 ^ carry1[128];
+
+// ---- bit 129 ----
+wire b0_eff_129 = b[258] ^ sub;
+wire p0_129 = a[258]   ^ b0_eff_129;
+wire p1_129 = a[259] ^ b[259];
+wire g0_129, g1_129, t0_129, t1_129;
+MSKand_opini2_d2 u_generate_129 (
+    .ina({a[259], a[258]}), .inb({b[259], b0_eff_129}),
+    .rnd(r[258]), .s(s[258]), .clk(clk), .out({g1_129, g0_129}));
+MSKand_opini2_d2 u_propagate_129 (
+    .ina({carry1[129], carry0[129]}), .inb({p1_129, p0_129}),
+    .rnd(r[259]), .s(s[259]), .clk(clk), .out({t1_129, t0_129}));
+assign carry0[130] = g0_129 ^ t0_129;
+assign carry1[130] = g1_129 ^ t1_129;
+assign sum[258]   = p0_129 ^ carry0[129];
+assign sum[259] = p1_129 ^ carry1[129];
+
+// ---- bit 130 ----
+wire b0_eff_130 = b[260] ^ sub;
+wire p0_130 = a[260]   ^ b0_eff_130;
+wire p1_130 = a[261] ^ b[261];
+wire g0_130, g1_130, t0_130, t1_130;
+MSKand_opini2_d2 u_generate_130 (
+    .ina({a[261], a[260]}), .inb({b[261], b0_eff_130}),
+    .rnd(r[260]), .s(s[260]), .clk(clk), .out({g1_130, g0_130}));
+MSKand_opini2_d2 u_propagate_130 (
+    .ina({carry1[130], carry0[130]}), .inb({p1_130, p0_130}),
+    .rnd(r[261]), .s(s[261]), .clk(clk), .out({t1_130, t0_130}));
+assign carry0[131] = g0_130 ^ t0_130;
+assign carry1[131] = g1_130 ^ t1_130;
+assign sum[260]   = p0_130 ^ carry0[130];
+assign sum[261] = p1_130 ^ carry1[130];
+
+// ---- bit 131 ----
+wire b0_eff_131 = b[262] ^ sub;
+wire p0_131 = a[262]   ^ b0_eff_131;
+wire p1_131 = a[263] ^ b[263];
+wire g0_131, g1_131, t0_131, t1_131;
+MSKand_opini2_d2 u_generate_131 (
+    .ina({a[263], a[262]}), .inb({b[263], b0_eff_131}),
+    .rnd(r[262]), .s(s[262]), .clk(clk), .out({g1_131, g0_131}));
+MSKand_opini2_d2 u_propagate_131 (
+    .ina({carry1[131], carry0[131]}), .inb({p1_131, p0_131}),
+    .rnd(r[263]), .s(s[263]), .clk(clk), .out({t1_131, t0_131}));
+assign carry0[132] = g0_131 ^ t0_131;
+assign carry1[132] = g1_131 ^ t1_131;
+assign sum[262]   = p0_131 ^ carry0[131];
+assign sum[263] = p1_131 ^ carry1[131];
+
+// ---- bit 132 ----
+wire b0_eff_132 = b[264] ^ sub;
+wire p0_132 = a[264]   ^ b0_eff_132;
+wire p1_132 = a[265] ^ b[265];
+wire g0_132, g1_132, t0_132, t1_132;
+MSKand_opini2_d2 u_generate_132 (
+    .ina({a[265], a[264]}), .inb({b[265], b0_eff_132}),
+    .rnd(r[264]), .s(s[264]), .clk(clk), .out({g1_132, g0_132}));
+MSKand_opini2_d2 u_propagate_132 (
+    .ina({carry1[132], carry0[132]}), .inb({p1_132, p0_132}),
+    .rnd(r[265]), .s(s[265]), .clk(clk), .out({t1_132, t0_132}));
+assign carry0[133] = g0_132 ^ t0_132;
+assign carry1[133] = g1_132 ^ t1_132;
+assign sum[264]   = p0_132 ^ carry0[132];
+assign sum[265] = p1_132 ^ carry1[132];
+
+// ---- bit 133 ----
+wire b0_eff_133 = b[266] ^ sub;
+wire p0_133 = a[266]   ^ b0_eff_133;
+wire p1_133 = a[267] ^ b[267];
+wire g0_133, g1_133, t0_133, t1_133;
+MSKand_opini2_d2 u_generate_133 (
+    .ina({a[267], a[266]}), .inb({b[267], b0_eff_133}),
+    .rnd(r[266]), .s(s[266]), .clk(clk), .out({g1_133, g0_133}));
+MSKand_opini2_d2 u_propagate_133 (
+    .ina({carry1[133], carry0[133]}), .inb({p1_133, p0_133}),
+    .rnd(r[267]), .s(s[267]), .clk(clk), .out({t1_133, t0_133}));
+assign carry0[134] = g0_133 ^ t0_133;
+assign carry1[134] = g1_133 ^ t1_133;
+assign sum[266]   = p0_133 ^ carry0[133];
+assign sum[267] = p1_133 ^ carry1[133];
+
+// ---- bit 134 ----
+wire b0_eff_134 = b[268] ^ sub;
+wire p0_134 = a[268]   ^ b0_eff_134;
+wire p1_134 = a[269] ^ b[269];
+wire g0_134, g1_134, t0_134, t1_134;
+MSKand_opini2_d2 u_generate_134 (
+    .ina({a[269], a[268]}), .inb({b[269], b0_eff_134}),
+    .rnd(r[268]), .s(s[268]), .clk(clk), .out({g1_134, g0_134}));
+MSKand_opini2_d2 u_propagate_134 (
+    .ina({carry1[134], carry0[134]}), .inb({p1_134, p0_134}),
+    .rnd(r[269]), .s(s[269]), .clk(clk), .out({t1_134, t0_134}));
+assign carry0[135] = g0_134 ^ t0_134;
+assign carry1[135] = g1_134 ^ t1_134;
+assign sum[268]   = p0_134 ^ carry0[134];
+assign sum[269] = p1_134 ^ carry1[134];
+
+// ---- bit 135 ----
+wire b0_eff_135 = b[270] ^ sub;
+wire p0_135 = a[270]   ^ b0_eff_135;
+wire p1_135 = a[271] ^ b[271];
+wire g0_135, g1_135, t0_135, t1_135;
+MSKand_opini2_d2 u_generate_135 (
+    .ina({a[271], a[270]}), .inb({b[271], b0_eff_135}),
+    .rnd(r[270]), .s(s[270]), .clk(clk), .out({g1_135, g0_135}));
+MSKand_opini2_d2 u_propagate_135 (
+    .ina({carry1[135], carry0[135]}), .inb({p1_135, p0_135}),
+    .rnd(r[271]), .s(s[271]), .clk(clk), .out({t1_135, t0_135}));
+assign carry0[136] = g0_135 ^ t0_135;
+assign carry1[136] = g1_135 ^ t1_135;
+assign sum[270]   = p0_135 ^ carry0[135];
+assign sum[271] = p1_135 ^ carry1[135];
+
+// ---- bit 136 ----
+wire b0_eff_136 = b[272] ^ sub;
+wire p0_136 = a[272]   ^ b0_eff_136;
+wire p1_136 = a[273] ^ b[273];
+wire g0_136, g1_136, t0_136, t1_136;
+MSKand_opini2_d2 u_generate_136 (
+    .ina({a[273], a[272]}), .inb({b[273], b0_eff_136}),
+    .rnd(r[272]), .s(s[272]), .clk(clk), .out({g1_136, g0_136}));
+MSKand_opini2_d2 u_propagate_136 (
+    .ina({carry1[136], carry0[136]}), .inb({p1_136, p0_136}),
+    .rnd(r[273]), .s(s[273]), .clk(clk), .out({t1_136, t0_136}));
+assign carry0[137] = g0_136 ^ t0_136;
+assign carry1[137] = g1_136 ^ t1_136;
+assign sum[272]   = p0_136 ^ carry0[136];
+assign sum[273] = p1_136 ^ carry1[136];
+
+// ---- bit 137 ----
+wire b0_eff_137 = b[274] ^ sub;
+wire p0_137 = a[274]   ^ b0_eff_137;
+wire p1_137 = a[275] ^ b[275];
+wire g0_137, g1_137, t0_137, t1_137;
+MSKand_opini2_d2 u_generate_137 (
+    .ina({a[275], a[274]}), .inb({b[275], b0_eff_137}),
+    .rnd(r[274]), .s(s[274]), .clk(clk), .out({g1_137, g0_137}));
+MSKand_opini2_d2 u_propagate_137 (
+    .ina({carry1[137], carry0[137]}), .inb({p1_137, p0_137}),
+    .rnd(r[275]), .s(s[275]), .clk(clk), .out({t1_137, t0_137}));
+assign carry0[138] = g0_137 ^ t0_137;
+assign carry1[138] = g1_137 ^ t1_137;
+assign sum[274]   = p0_137 ^ carry0[137];
+assign sum[275] = p1_137 ^ carry1[137];
+
+// ---- bit 138 ----
+wire b0_eff_138 = b[276] ^ sub;
+wire p0_138 = a[276]   ^ b0_eff_138;
+wire p1_138 = a[277] ^ b[277];
+wire g0_138, g1_138, t0_138, t1_138;
+MSKand_opini2_d2 u_generate_138 (
+    .ina({a[277], a[276]}), .inb({b[277], b0_eff_138}),
+    .rnd(r[276]), .s(s[276]), .clk(clk), .out({g1_138, g0_138}));
+MSKand_opini2_d2 u_propagate_138 (
+    .ina({carry1[138], carry0[138]}), .inb({p1_138, p0_138}),
+    .rnd(r[277]), .s(s[277]), .clk(clk), .out({t1_138, t0_138}));
+assign carry0[139] = g0_138 ^ t0_138;
+assign carry1[139] = g1_138 ^ t1_138;
+assign sum[276]   = p0_138 ^ carry0[138];
+assign sum[277] = p1_138 ^ carry1[138];
+
+// ---- bit 139 ----
+wire b0_eff_139 = b[278] ^ sub;
+wire p0_139 = a[278]   ^ b0_eff_139;
+wire p1_139 = a[279] ^ b[279];
+wire g0_139, g1_139, t0_139, t1_139;
+MSKand_opini2_d2 u_generate_139 (
+    .ina({a[279], a[278]}), .inb({b[279], b0_eff_139}),
+    .rnd(r[278]), .s(s[278]), .clk(clk), .out({g1_139, g0_139}));
+MSKand_opini2_d2 u_propagate_139 (
+    .ina({carry1[139], carry0[139]}), .inb({p1_139, p0_139}),
+    .rnd(r[279]), .s(s[279]), .clk(clk), .out({t1_139, t0_139}));
+assign carry0[140] = g0_139 ^ t0_139;
+assign carry1[140] = g1_139 ^ t1_139;
+assign sum[278]   = p0_139 ^ carry0[139];
+assign sum[279] = p1_139 ^ carry1[139];
+
+// ---- bit 140 ----
+wire b0_eff_140 = b[280] ^ sub;
+wire p0_140 = a[280]   ^ b0_eff_140;
+wire p1_140 = a[281] ^ b[281];
+wire g0_140, g1_140, t0_140, t1_140;
+MSKand_opini2_d2 u_generate_140 (
+    .ina({a[281], a[280]}), .inb({b[281], b0_eff_140}),
+    .rnd(r[280]), .s(s[280]), .clk(clk), .out({g1_140, g0_140}));
+MSKand_opini2_d2 u_propagate_140 (
+    .ina({carry1[140], carry0[140]}), .inb({p1_140, p0_140}),
+    .rnd(r[281]), .s(s[281]), .clk(clk), .out({t1_140, t0_140}));
+assign carry0[141] = g0_140 ^ t0_140;
+assign carry1[141] = g1_140 ^ t1_140;
+assign sum[280]   = p0_140 ^ carry0[140];
+assign sum[281] = p1_140 ^ carry1[140];
+
+// ---- bit 141 ----
+wire b0_eff_141 = b[282] ^ sub;
+wire p0_141 = a[282]   ^ b0_eff_141;
+wire p1_141 = a[283] ^ b[283];
+wire g0_141, g1_141, t0_141, t1_141;
+MSKand_opini2_d2 u_generate_141 (
+    .ina({a[283], a[282]}), .inb({b[283], b0_eff_141}),
+    .rnd(r[282]), .s(s[282]), .clk(clk), .out({g1_141, g0_141}));
+MSKand_opini2_d2 u_propagate_141 (
+    .ina({carry1[141], carry0[141]}), .inb({p1_141, p0_141}),
+    .rnd(r[283]), .s(s[283]), .clk(clk), .out({t1_141, t0_141}));
+assign carry0[142] = g0_141 ^ t0_141;
+assign carry1[142] = g1_141 ^ t1_141;
+assign sum[282]   = p0_141 ^ carry0[141];
+assign sum[283] = p1_141 ^ carry1[141];
+
+// ---- bit 142 ----
+wire b0_eff_142 = b[284] ^ sub;
+wire p0_142 = a[284]   ^ b0_eff_142;
+wire p1_142 = a[285] ^ b[285];
+wire g0_142, g1_142, t0_142, t1_142;
+MSKand_opini2_d2 u_generate_142 (
+    .ina({a[285], a[284]}), .inb({b[285], b0_eff_142}),
+    .rnd(r[284]), .s(s[284]), .clk(clk), .out({g1_142, g0_142}));
+MSKand_opini2_d2 u_propagate_142 (
+    .ina({carry1[142], carry0[142]}), .inb({p1_142, p0_142}),
+    .rnd(r[285]), .s(s[285]), .clk(clk), .out({t1_142, t0_142}));
+assign carry0[143] = g0_142 ^ t0_142;
+assign carry1[143] = g1_142 ^ t1_142;
+assign sum[284]   = p0_142 ^ carry0[142];
+assign sum[285] = p1_142 ^ carry1[142];
+
+// ---- bit 143 ----
+wire b0_eff_143 = b[286] ^ sub;
+wire p0_143 = a[286]   ^ b0_eff_143;
+wire p1_143 = a[287] ^ b[287];
+wire g0_143, g1_143, t0_143, t1_143;
+MSKand_opini2_d2 u_generate_143 (
+    .ina({a[287], a[286]}), .inb({b[287], b0_eff_143}),
+    .rnd(r[286]), .s(s[286]), .clk(clk), .out({g1_143, g0_143}));
+MSKand_opini2_d2 u_propagate_143 (
+    .ina({carry1[143], carry0[143]}), .inb({p1_143, p0_143}),
+    .rnd(r[287]), .s(s[287]), .clk(clk), .out({t1_143, t0_143}));
+assign carry0[144] = g0_143 ^ t0_143;
+assign carry1[144] = g1_143 ^ t1_143;
+assign sum[286]   = p0_143 ^ carry0[143];
+assign sum[287] = p1_143 ^ carry1[143];
+
+// ---- bit 144 ----
+wire b0_eff_144 = b[288] ^ sub;
+wire p0_144 = a[288]   ^ b0_eff_144;
+wire p1_144 = a[289] ^ b[289];
+wire g0_144, g1_144, t0_144, t1_144;
+MSKand_opini2_d2 u_generate_144 (
+    .ina({a[289], a[288]}), .inb({b[289], b0_eff_144}),
+    .rnd(r[288]), .s(s[288]), .clk(clk), .out({g1_144, g0_144}));
+MSKand_opini2_d2 u_propagate_144 (
+    .ina({carry1[144], carry0[144]}), .inb({p1_144, p0_144}),
+    .rnd(r[289]), .s(s[289]), .clk(clk), .out({t1_144, t0_144}));
+assign carry0[145] = g0_144 ^ t0_144;
+assign carry1[145] = g1_144 ^ t1_144;
+assign sum[288]   = p0_144 ^ carry0[144];
+assign sum[289] = p1_144 ^ carry1[144];
+
+// ---- bit 145 ----
+wire b0_eff_145 = b[290] ^ sub;
+wire p0_145 = a[290]   ^ b0_eff_145;
+wire p1_145 = a[291] ^ b[291];
+wire g0_145, g1_145, t0_145, t1_145;
+MSKand_opini2_d2 u_generate_145 (
+    .ina({a[291], a[290]}), .inb({b[291], b0_eff_145}),
+    .rnd(r[290]), .s(s[290]), .clk(clk), .out({g1_145, g0_145}));
+MSKand_opini2_d2 u_propagate_145 (
+    .ina({carry1[145], carry0[145]}), .inb({p1_145, p0_145}),
+    .rnd(r[291]), .s(s[291]), .clk(clk), .out({t1_145, t0_145}));
+assign carry0[146] = g0_145 ^ t0_145;
+assign carry1[146] = g1_145 ^ t1_145;
+assign sum[290]   = p0_145 ^ carry0[145];
+assign sum[291] = p1_145 ^ carry1[145];
+
+// ---- bit 146 ----
+wire b0_eff_146 = b[292] ^ sub;
+wire p0_146 = a[292]   ^ b0_eff_146;
+wire p1_146 = a[293] ^ b[293];
+wire g0_146, g1_146, t0_146, t1_146;
+MSKand_opini2_d2 u_generate_146 (
+    .ina({a[293], a[292]}), .inb({b[293], b0_eff_146}),
+    .rnd(r[292]), .s(s[292]), .clk(clk), .out({g1_146, g0_146}));
+MSKand_opini2_d2 u_propagate_146 (
+    .ina({carry1[146], carry0[146]}), .inb({p1_146, p0_146}),
+    .rnd(r[293]), .s(s[293]), .clk(clk), .out({t1_146, t0_146}));
+assign carry0[147] = g0_146 ^ t0_146;
+assign carry1[147] = g1_146 ^ t1_146;
+assign sum[292]   = p0_146 ^ carry0[146];
+assign sum[293] = p1_146 ^ carry1[146];
+
+// ---- bit 147 ----
+wire b0_eff_147 = b[294] ^ sub;
+wire p0_147 = a[294]   ^ b0_eff_147;
+wire p1_147 = a[295] ^ b[295];
+wire g0_147, g1_147, t0_147, t1_147;
+MSKand_opini2_d2 u_generate_147 (
+    .ina({a[295], a[294]}), .inb({b[295], b0_eff_147}),
+    .rnd(r[294]), .s(s[294]), .clk(clk), .out({g1_147, g0_147}));
+MSKand_opini2_d2 u_propagate_147 (
+    .ina({carry1[147], carry0[147]}), .inb({p1_147, p0_147}),
+    .rnd(r[295]), .s(s[295]), .clk(clk), .out({t1_147, t0_147}));
+assign carry0[148] = g0_147 ^ t0_147;
+assign carry1[148] = g1_147 ^ t1_147;
+assign sum[294]   = p0_147 ^ carry0[147];
+assign sum[295] = p1_147 ^ carry1[147];
+
+// ---- bit 148 ----
+wire b0_eff_148 = b[296] ^ sub;
+wire p0_148 = a[296]   ^ b0_eff_148;
+wire p1_148 = a[297] ^ b[297];
+wire g0_148, g1_148, t0_148, t1_148;
+MSKand_opini2_d2 u_generate_148 (
+    .ina({a[297], a[296]}), .inb({b[297], b0_eff_148}),
+    .rnd(r[296]), .s(s[296]), .clk(clk), .out({g1_148, g0_148}));
+MSKand_opini2_d2 u_propagate_148 (
+    .ina({carry1[148], carry0[148]}), .inb({p1_148, p0_148}),
+    .rnd(r[297]), .s(s[297]), .clk(clk), .out({t1_148, t0_148}));
+assign carry0[149] = g0_148 ^ t0_148;
+assign carry1[149] = g1_148 ^ t1_148;
+assign sum[296]   = p0_148 ^ carry0[148];
+assign sum[297] = p1_148 ^ carry1[148];
+
+// ---- bit 149 ----
+wire b0_eff_149 = b[298] ^ sub;
+wire p0_149 = a[298]   ^ b0_eff_149;
+wire p1_149 = a[299] ^ b[299];
+wire g0_149, g1_149, t0_149, t1_149;
+MSKand_opini2_d2 u_generate_149 (
+    .ina({a[299], a[298]}), .inb({b[299], b0_eff_149}),
+    .rnd(r[298]), .s(s[298]), .clk(clk), .out({g1_149, g0_149}));
+MSKand_opini2_d2 u_propagate_149 (
+    .ina({carry1[149], carry0[149]}), .inb({p1_149, p0_149}),
+    .rnd(r[299]), .s(s[299]), .clk(clk), .out({t1_149, t0_149}));
+assign carry0[150] = g0_149 ^ t0_149;
+assign carry1[150] = g1_149 ^ t1_149;
+assign sum[298]   = p0_149 ^ carry0[149];
+assign sum[299] = p1_149 ^ carry1[149];
+
+// ---- bit 150 ----
+wire b0_eff_150 = b[300] ^ sub;
+wire p0_150 = a[300]   ^ b0_eff_150;
+wire p1_150 = a[301] ^ b[301];
+wire g0_150, g1_150, t0_150, t1_150;
+MSKand_opini2_d2 u_generate_150 (
+    .ina({a[301], a[300]}), .inb({b[301], b0_eff_150}),
+    .rnd(r[300]), .s(s[300]), .clk(clk), .out({g1_150, g0_150}));
+MSKand_opini2_d2 u_propagate_150 (
+    .ina({carry1[150], carry0[150]}), .inb({p1_150, p0_150}),
+    .rnd(r[301]), .s(s[301]), .clk(clk), .out({t1_150, t0_150}));
+assign carry0[151] = g0_150 ^ t0_150;
+assign carry1[151] = g1_150 ^ t1_150;
+assign sum[300]   = p0_150 ^ carry0[150];
+assign sum[301] = p1_150 ^ carry1[150];
+
+// ---- bit 151 ----
+wire b0_eff_151 = b[302] ^ sub;
+wire p0_151 = a[302]   ^ b0_eff_151;
+wire p1_151 = a[303] ^ b[303];
+wire g0_151, g1_151, t0_151, t1_151;
+MSKand_opini2_d2 u_generate_151 (
+    .ina({a[303], a[302]}), .inb({b[303], b0_eff_151}),
+    .rnd(r[302]), .s(s[302]), .clk(clk), .out({g1_151, g0_151}));
+MSKand_opini2_d2 u_propagate_151 (
+    .ina({carry1[151], carry0[151]}), .inb({p1_151, p0_151}),
+    .rnd(r[303]), .s(s[303]), .clk(clk), .out({t1_151, t0_151}));
+assign carry0[152] = g0_151 ^ t0_151;
+assign carry1[152] = g1_151 ^ t1_151;
+assign sum[302]   = p0_151 ^ carry0[151];
+assign sum[303] = p1_151 ^ carry1[151];
+
+// ---- bit 152 ----
+wire b0_eff_152 = b[304] ^ sub;
+wire p0_152 = a[304]   ^ b0_eff_152;
+wire p1_152 = a[305] ^ b[305];
+wire g0_152, g1_152, t0_152, t1_152;
+MSKand_opini2_d2 u_generate_152 (
+    .ina({a[305], a[304]}), .inb({b[305], b0_eff_152}),
+    .rnd(r[304]), .s(s[304]), .clk(clk), .out({g1_152, g0_152}));
+MSKand_opini2_d2 u_propagate_152 (
+    .ina({carry1[152], carry0[152]}), .inb({p1_152, p0_152}),
+    .rnd(r[305]), .s(s[305]), .clk(clk), .out({t1_152, t0_152}));
+assign carry0[153] = g0_152 ^ t0_152;
+assign carry1[153] = g1_152 ^ t1_152;
+assign sum[304]   = p0_152 ^ carry0[152];
+assign sum[305] = p1_152 ^ carry1[152];
+
+// ---- bit 153 ----
+wire b0_eff_153 = b[306] ^ sub;
+wire p0_153 = a[306]   ^ b0_eff_153;
+wire p1_153 = a[307] ^ b[307];
+wire g0_153, g1_153, t0_153, t1_153;
+MSKand_opini2_d2 u_generate_153 (
+    .ina({a[307], a[306]}), .inb({b[307], b0_eff_153}),
+    .rnd(r[306]), .s(s[306]), .clk(clk), .out({g1_153, g0_153}));
+MSKand_opini2_d2 u_propagate_153 (
+    .ina({carry1[153], carry0[153]}), .inb({p1_153, p0_153}),
+    .rnd(r[307]), .s(s[307]), .clk(clk), .out({t1_153, t0_153}));
+assign carry0[154] = g0_153 ^ t0_153;
+assign carry1[154] = g1_153 ^ t1_153;
+assign sum[306]   = p0_153 ^ carry0[153];
+assign sum[307] = p1_153 ^ carry1[153];
+
+// ---- bit 154 ----
+wire b0_eff_154 = b[308] ^ sub;
+wire p0_154 = a[308]   ^ b0_eff_154;
+wire p1_154 = a[309] ^ b[309];
+wire g0_154, g1_154, t0_154, t1_154;
+MSKand_opini2_d2 u_generate_154 (
+    .ina({a[309], a[308]}), .inb({b[309], b0_eff_154}),
+    .rnd(r[308]), .s(s[308]), .clk(clk), .out({g1_154, g0_154}));
+MSKand_opini2_d2 u_propagate_154 (
+    .ina({carry1[154], carry0[154]}), .inb({p1_154, p0_154}),
+    .rnd(r[309]), .s(s[309]), .clk(clk), .out({t1_154, t0_154}));
+assign carry0[155] = g0_154 ^ t0_154;
+assign carry1[155] = g1_154 ^ t1_154;
+assign sum[308]   = p0_154 ^ carry0[154];
+assign sum[309] = p1_154 ^ carry1[154];
+
+// ---- bit 155 ----
+wire b0_eff_155 = b[310] ^ sub;
+wire p0_155 = a[310]   ^ b0_eff_155;
+wire p1_155 = a[311] ^ b[311];
+wire g0_155, g1_155, t0_155, t1_155;
+MSKand_opini2_d2 u_generate_155 (
+    .ina({a[311], a[310]}), .inb({b[311], b0_eff_155}),
+    .rnd(r[310]), .s(s[310]), .clk(clk), .out({g1_155, g0_155}));
+MSKand_opini2_d2 u_propagate_155 (
+    .ina({carry1[155], carry0[155]}), .inb({p1_155, p0_155}),
+    .rnd(r[311]), .s(s[311]), .clk(clk), .out({t1_155, t0_155}));
+assign carry0[156] = g0_155 ^ t0_155;
+assign carry1[156] = g1_155 ^ t1_155;
+assign sum[310]   = p0_155 ^ carry0[155];
+assign sum[311] = p1_155 ^ carry1[155];
+
+// ---- bit 156 ----
+wire b0_eff_156 = b[312] ^ sub;
+wire p0_156 = a[312]   ^ b0_eff_156;
+wire p1_156 = a[313] ^ b[313];
+wire g0_156, g1_156, t0_156, t1_156;
+MSKand_opini2_d2 u_generate_156 (
+    .ina({a[313], a[312]}), .inb({b[313], b0_eff_156}),
+    .rnd(r[312]), .s(s[312]), .clk(clk), .out({g1_156, g0_156}));
+MSKand_opini2_d2 u_propagate_156 (
+    .ina({carry1[156], carry0[156]}), .inb({p1_156, p0_156}),
+    .rnd(r[313]), .s(s[313]), .clk(clk), .out({t1_156, t0_156}));
+assign carry0[157] = g0_156 ^ t0_156;
+assign carry1[157] = g1_156 ^ t1_156;
+assign sum[312]   = p0_156 ^ carry0[156];
+assign sum[313] = p1_156 ^ carry1[156];
+
+// ---- bit 157 ----
+wire b0_eff_157 = b[314] ^ sub;
+wire p0_157 = a[314]   ^ b0_eff_157;
+wire p1_157 = a[315] ^ b[315];
+wire g0_157, g1_157, t0_157, t1_157;
+MSKand_opini2_d2 u_generate_157 (
+    .ina({a[315], a[314]}), .inb({b[315], b0_eff_157}),
+    .rnd(r[314]), .s(s[314]), .clk(clk), .out({g1_157, g0_157}));
+MSKand_opini2_d2 u_propagate_157 (
+    .ina({carry1[157], carry0[157]}), .inb({p1_157, p0_157}),
+    .rnd(r[315]), .s(s[315]), .clk(clk), .out({t1_157, t0_157}));
+assign carry0[158] = g0_157 ^ t0_157;
+assign carry1[158] = g1_157 ^ t1_157;
+assign sum[314]   = p0_157 ^ carry0[157];
+assign sum[315] = p1_157 ^ carry1[157];
+
+// ---- bit 158 ----
+wire b0_eff_158 = b[316] ^ sub;
+wire p0_158 = a[316]   ^ b0_eff_158;
+wire p1_158 = a[317] ^ b[317];
+wire g0_158, g1_158, t0_158, t1_158;
+MSKand_opini2_d2 u_generate_158 (
+    .ina({a[317], a[316]}), .inb({b[317], b0_eff_158}),
+    .rnd(r[316]), .s(s[316]), .clk(clk), .out({g1_158, g0_158}));
+MSKand_opini2_d2 u_propagate_158 (
+    .ina({carry1[158], carry0[158]}), .inb({p1_158, p0_158}),
+    .rnd(r[317]), .s(s[317]), .clk(clk), .out({t1_158, t0_158}));
+assign carry0[159] = g0_158 ^ t0_158;
+assign carry1[159] = g1_158 ^ t1_158;
+assign sum[316]   = p0_158 ^ carry0[158];
+assign sum[317] = p1_158 ^ carry1[158];
+
+// ---- bit 159 ----
+wire b0_eff_159 = b[318] ^ sub;
+wire p0_159 = a[318]   ^ b0_eff_159;
+wire p1_159 = a[319] ^ b[319];
+wire g0_159, g1_159, t0_159, t1_159;
+MSKand_opini2_d2 u_generate_159 (
+    .ina({a[319], a[318]}), .inb({b[319], b0_eff_159}),
+    .rnd(r[318]), .s(s[318]), .clk(clk), .out({g1_159, g0_159}));
+MSKand_opini2_d2 u_propagate_159 (
+    .ina({carry1[159], carry0[159]}), .inb({p1_159, p0_159}),
+    .rnd(r[319]), .s(s[319]), .clk(clk), .out({t1_159, t0_159}));
+assign carry0[160] = g0_159 ^ t0_159;
+assign carry1[160] = g1_159 ^ t1_159;
+assign sum[318]   = p0_159 ^ carry0[159];
+assign sum[319] = p1_159 ^ carry1[159];
+
+// ---- bit 160 ----
+wire b0_eff_160 = b[320] ^ sub;
+wire p0_160 = a[320]   ^ b0_eff_160;
+wire p1_160 = a[321] ^ b[321];
+wire g0_160, g1_160, t0_160, t1_160;
+MSKand_opini2_d2 u_generate_160 (
+    .ina({a[321], a[320]}), .inb({b[321], b0_eff_160}),
+    .rnd(r[320]), .s(s[320]), .clk(clk), .out({g1_160, g0_160}));
+MSKand_opini2_d2 u_propagate_160 (
+    .ina({carry1[160], carry0[160]}), .inb({p1_160, p0_160}),
+    .rnd(r[321]), .s(s[321]), .clk(clk), .out({t1_160, t0_160}));
+assign carry0[161] = g0_160 ^ t0_160;
+assign carry1[161] = g1_160 ^ t1_160;
+assign sum[320]   = p0_160 ^ carry0[160];
+assign sum[321] = p1_160 ^ carry1[160];
+
+// ---- bit 161 ----
+wire b0_eff_161 = b[322] ^ sub;
+wire p0_161 = a[322]   ^ b0_eff_161;
+wire p1_161 = a[323] ^ b[323];
+wire g0_161, g1_161, t0_161, t1_161;
+MSKand_opini2_d2 u_generate_161 (
+    .ina({a[323], a[322]}), .inb({b[323], b0_eff_161}),
+    .rnd(r[322]), .s(s[322]), .clk(clk), .out({g1_161, g0_161}));
+MSKand_opini2_d2 u_propagate_161 (
+    .ina({carry1[161], carry0[161]}), .inb({p1_161, p0_161}),
+    .rnd(r[323]), .s(s[323]), .clk(clk), .out({t1_161, t0_161}));
+assign carry0[162] = g0_161 ^ t0_161;
+assign carry1[162] = g1_161 ^ t1_161;
+assign sum[322]   = p0_161 ^ carry0[161];
+assign sum[323] = p1_161 ^ carry1[161];
+
+// ---- bit 162 ----
+wire b0_eff_162 = b[324] ^ sub;
+wire p0_162 = a[324]   ^ b0_eff_162;
+wire p1_162 = a[325] ^ b[325];
+wire g0_162, g1_162, t0_162, t1_162;
+MSKand_opini2_d2 u_generate_162 (
+    .ina({a[325], a[324]}), .inb({b[325], b0_eff_162}),
+    .rnd(r[324]), .s(s[324]), .clk(clk), .out({g1_162, g0_162}));
+MSKand_opini2_d2 u_propagate_162 (
+    .ina({carry1[162], carry0[162]}), .inb({p1_162, p0_162}),
+    .rnd(r[325]), .s(s[325]), .clk(clk), .out({t1_162, t0_162}));
+assign carry0[163] = g0_162 ^ t0_162;
+assign carry1[163] = g1_162 ^ t1_162;
+assign sum[324]   = p0_162 ^ carry0[162];
+assign sum[325] = p1_162 ^ carry1[162];
+
+// ---- bit 163 ----
+wire b0_eff_163 = b[326] ^ sub;
+wire p0_163 = a[326]   ^ b0_eff_163;
+wire p1_163 = a[327] ^ b[327];
+wire g0_163, g1_163, t0_163, t1_163;
+MSKand_opini2_d2 u_generate_163 (
+    .ina({a[327], a[326]}), .inb({b[327], b0_eff_163}),
+    .rnd(r[326]), .s(s[326]), .clk(clk), .out({g1_163, g0_163}));
+MSKand_opini2_d2 u_propagate_163 (
+    .ina({carry1[163], carry0[163]}), .inb({p1_163, p0_163}),
+    .rnd(r[327]), .s(s[327]), .clk(clk), .out({t1_163, t0_163}));
+assign carry0[164] = g0_163 ^ t0_163;
+assign carry1[164] = g1_163 ^ t1_163;
+assign sum[326]   = p0_163 ^ carry0[163];
+assign sum[327] = p1_163 ^ carry1[163];
+
+// ---- bit 164 ----
+wire b0_eff_164 = b[328] ^ sub;
+wire p0_164 = a[328]   ^ b0_eff_164;
+wire p1_164 = a[329] ^ b[329];
+wire g0_164, g1_164, t0_164, t1_164;
+MSKand_opini2_d2 u_generate_164 (
+    .ina({a[329], a[328]}), .inb({b[329], b0_eff_164}),
+    .rnd(r[328]), .s(s[328]), .clk(clk), .out({g1_164, g0_164}));
+MSKand_opini2_d2 u_propagate_164 (
+    .ina({carry1[164], carry0[164]}), .inb({p1_164, p0_164}),
+    .rnd(r[329]), .s(s[329]), .clk(clk), .out({t1_164, t0_164}));
+assign carry0[165] = g0_164 ^ t0_164;
+assign carry1[165] = g1_164 ^ t1_164;
+assign sum[328]   = p0_164 ^ carry0[164];
+assign sum[329] = p1_164 ^ carry1[164];
+
+// ---- bit 165 ----
+wire b0_eff_165 = b[330] ^ sub;
+wire p0_165 = a[330]   ^ b0_eff_165;
+wire p1_165 = a[331] ^ b[331];
+wire g0_165, g1_165, t0_165, t1_165;
+MSKand_opini2_d2 u_generate_165 (
+    .ina({a[331], a[330]}), .inb({b[331], b0_eff_165}),
+    .rnd(r[330]), .s(s[330]), .clk(clk), .out({g1_165, g0_165}));
+MSKand_opini2_d2 u_propagate_165 (
+    .ina({carry1[165], carry0[165]}), .inb({p1_165, p0_165}),
+    .rnd(r[331]), .s(s[331]), .clk(clk), .out({t1_165, t0_165}));
+assign carry0[166] = g0_165 ^ t0_165;
+assign carry1[166] = g1_165 ^ t1_165;
+assign sum[330]   = p0_165 ^ carry0[165];
+assign sum[331] = p1_165 ^ carry1[165];
+
+// ---- bit 166 ----
+wire b0_eff_166 = b[332] ^ sub;
+wire p0_166 = a[332]   ^ b0_eff_166;
+wire p1_166 = a[333] ^ b[333];
+wire g0_166, g1_166, t0_166, t1_166;
+MSKand_opini2_d2 u_generate_166 (
+    .ina({a[333], a[332]}), .inb({b[333], b0_eff_166}),
+    .rnd(r[332]), .s(s[332]), .clk(clk), .out({g1_166, g0_166}));
+MSKand_opini2_d2 u_propagate_166 (
+    .ina({carry1[166], carry0[166]}), .inb({p1_166, p0_166}),
+    .rnd(r[333]), .s(s[333]), .clk(clk), .out({t1_166, t0_166}));
+assign carry0[167] = g0_166 ^ t0_166;
+assign carry1[167] = g1_166 ^ t1_166;
+assign sum[332]   = p0_166 ^ carry0[166];
+assign sum[333] = p1_166 ^ carry1[166];
+
+// ---- bit 167 ----
+wire b0_eff_167 = b[334] ^ sub;
+wire p0_167 = a[334]   ^ b0_eff_167;
+wire p1_167 = a[335] ^ b[335];
+wire g0_167, g1_167, t0_167, t1_167;
+MSKand_opini2_d2 u_generate_167 (
+    .ina({a[335], a[334]}), .inb({b[335], b0_eff_167}),
+    .rnd(r[334]), .s(s[334]), .clk(clk), .out({g1_167, g0_167}));
+MSKand_opini2_d2 u_propagate_167 (
+    .ina({carry1[167], carry0[167]}), .inb({p1_167, p0_167}),
+    .rnd(r[335]), .s(s[335]), .clk(clk), .out({t1_167, t0_167}));
+assign carry0[168] = g0_167 ^ t0_167;
+assign carry1[168] = g1_167 ^ t1_167;
+assign sum[334]   = p0_167 ^ carry0[167];
+assign sum[335] = p1_167 ^ carry1[167];
+
+// ---- bit 168 ----
+wire b0_eff_168 = b[336] ^ sub;
+wire p0_168 = a[336]   ^ b0_eff_168;
+wire p1_168 = a[337] ^ b[337];
+wire g0_168, g1_168, t0_168, t1_168;
+MSKand_opini2_d2 u_generate_168 (
+    .ina({a[337], a[336]}), .inb({b[337], b0_eff_168}),
+    .rnd(r[336]), .s(s[336]), .clk(clk), .out({g1_168, g0_168}));
+MSKand_opini2_d2 u_propagate_168 (
+    .ina({carry1[168], carry0[168]}), .inb({p1_168, p0_168}),
+    .rnd(r[337]), .s(s[337]), .clk(clk), .out({t1_168, t0_168}));
+assign carry0[169] = g0_168 ^ t0_168;
+assign carry1[169] = g1_168 ^ t1_168;
+assign sum[336]   = p0_168 ^ carry0[168];
+assign sum[337] = p1_168 ^ carry1[168];
+
+// ---- bit 169 ----
+wire b0_eff_169 = b[338] ^ sub;
+wire p0_169 = a[338]   ^ b0_eff_169;
+wire p1_169 = a[339] ^ b[339];
+wire g0_169, g1_169, t0_169, t1_169;
+MSKand_opini2_d2 u_generate_169 (
+    .ina({a[339], a[338]}), .inb({b[339], b0_eff_169}),
+    .rnd(r[338]), .s(s[338]), .clk(clk), .out({g1_169, g0_169}));
+MSKand_opini2_d2 u_propagate_169 (
+    .ina({carry1[169], carry0[169]}), .inb({p1_169, p0_169}),
+    .rnd(r[339]), .s(s[339]), .clk(clk), .out({t1_169, t0_169}));
+assign carry0[170] = g0_169 ^ t0_169;
+assign carry1[170] = g1_169 ^ t1_169;
+assign sum[338]   = p0_169 ^ carry0[169];
+assign sum[339] = p1_169 ^ carry1[169];
+
+// ---- bit 170 ----
+wire b0_eff_170 = b[340] ^ sub;
+wire p0_170 = a[340]   ^ b0_eff_170;
+wire p1_170 = a[341] ^ b[341];
+wire g0_170, g1_170, t0_170, t1_170;
+MSKand_opini2_d2 u_generate_170 (
+    .ina({a[341], a[340]}), .inb({b[341], b0_eff_170}),
+    .rnd(r[340]), .s(s[340]), .clk(clk), .out({g1_170, g0_170}));
+MSKand_opini2_d2 u_propagate_170 (
+    .ina({carry1[170], carry0[170]}), .inb({p1_170, p0_170}),
+    .rnd(r[341]), .s(s[341]), .clk(clk), .out({t1_170, t0_170}));
+assign carry0[171] = g0_170 ^ t0_170;
+assign carry1[171] = g1_170 ^ t1_170;
+assign sum[340]   = p0_170 ^ carry0[170];
+assign sum[341] = p1_170 ^ carry1[170];
+
+// ---- bit 171 ----
+wire b0_eff_171 = b[342] ^ sub;
+wire p0_171 = a[342]   ^ b0_eff_171;
+wire p1_171 = a[343] ^ b[343];
+wire g0_171, g1_171, t0_171, t1_171;
+MSKand_opini2_d2 u_generate_171 (
+    .ina({a[343], a[342]}), .inb({b[343], b0_eff_171}),
+    .rnd(r[342]), .s(s[342]), .clk(clk), .out({g1_171, g0_171}));
+MSKand_opini2_d2 u_propagate_171 (
+    .ina({carry1[171], carry0[171]}), .inb({p1_171, p0_171}),
+    .rnd(r[343]), .s(s[343]), .clk(clk), .out({t1_171, t0_171}));
+assign carry0[172] = g0_171 ^ t0_171;
+assign carry1[172] = g1_171 ^ t1_171;
+assign sum[342]   = p0_171 ^ carry0[171];
+assign sum[343] = p1_171 ^ carry1[171];
+
+// ---- bit 172 ----
+wire b0_eff_172 = b[344] ^ sub;
+wire p0_172 = a[344]   ^ b0_eff_172;
+wire p1_172 = a[345] ^ b[345];
+wire g0_172, g1_172, t0_172, t1_172;
+MSKand_opini2_d2 u_generate_172 (
+    .ina({a[345], a[344]}), .inb({b[345], b0_eff_172}),
+    .rnd(r[344]), .s(s[344]), .clk(clk), .out({g1_172, g0_172}));
+MSKand_opini2_d2 u_propagate_172 (
+    .ina({carry1[172], carry0[172]}), .inb({p1_172, p0_172}),
+    .rnd(r[345]), .s(s[345]), .clk(clk), .out({t1_172, t0_172}));
+assign carry0[173] = g0_172 ^ t0_172;
+assign carry1[173] = g1_172 ^ t1_172;
+assign sum[344]   = p0_172 ^ carry0[172];
+assign sum[345] = p1_172 ^ carry1[172];
+
+// ---- bit 173 ----
+wire b0_eff_173 = b[346] ^ sub;
+wire p0_173 = a[346]   ^ b0_eff_173;
+wire p1_173 = a[347] ^ b[347];
+wire g0_173, g1_173, t0_173, t1_173;
+MSKand_opini2_d2 u_generate_173 (
+    .ina({a[347], a[346]}), .inb({b[347], b0_eff_173}),
+    .rnd(r[346]), .s(s[346]), .clk(clk), .out({g1_173, g0_173}));
+MSKand_opini2_d2 u_propagate_173 (
+    .ina({carry1[173], carry0[173]}), .inb({p1_173, p0_173}),
+    .rnd(r[347]), .s(s[347]), .clk(clk), .out({t1_173, t0_173}));
+assign carry0[174] = g0_173 ^ t0_173;
+assign carry1[174] = g1_173 ^ t1_173;
+assign sum[346]   = p0_173 ^ carry0[173];
+assign sum[347] = p1_173 ^ carry1[173];
+
+// ---- bit 174 ----
+wire b0_eff_174 = b[348] ^ sub;
+wire p0_174 = a[348]   ^ b0_eff_174;
+wire p1_174 = a[349] ^ b[349];
+wire g0_174, g1_174, t0_174, t1_174;
+MSKand_opini2_d2 u_generate_174 (
+    .ina({a[349], a[348]}), .inb({b[349], b0_eff_174}),
+    .rnd(r[348]), .s(s[348]), .clk(clk), .out({g1_174, g0_174}));
+MSKand_opini2_d2 u_propagate_174 (
+    .ina({carry1[174], carry0[174]}), .inb({p1_174, p0_174}),
+    .rnd(r[349]), .s(s[349]), .clk(clk), .out({t1_174, t0_174}));
+assign carry0[175] = g0_174 ^ t0_174;
+assign carry1[175] = g1_174 ^ t1_174;
+assign sum[348]   = p0_174 ^ carry0[174];
+assign sum[349] = p1_174 ^ carry1[174];
+
+// ---- bit 175 ----
+wire b0_eff_175 = b[350] ^ sub;
+wire p0_175 = a[350]   ^ b0_eff_175;
+wire p1_175 = a[351] ^ b[351];
+wire g0_175, g1_175, t0_175, t1_175;
+MSKand_opini2_d2 u_generate_175 (
+    .ina({a[351], a[350]}), .inb({b[351], b0_eff_175}),
+    .rnd(r[350]), .s(s[350]), .clk(clk), .out({g1_175, g0_175}));
+MSKand_opini2_d2 u_propagate_175 (
+    .ina({carry1[175], carry0[175]}), .inb({p1_175, p0_175}),
+    .rnd(r[351]), .s(s[351]), .clk(clk), .out({t1_175, t0_175}));
+assign carry0[176] = g0_175 ^ t0_175;
+assign carry1[176] = g1_175 ^ t1_175;
+assign sum[350]   = p0_175 ^ carry0[175];
+assign sum[351] = p1_175 ^ carry1[175];
+
+// ---- bit 176 ----
+wire b0_eff_176 = b[352] ^ sub;
+wire p0_176 = a[352]   ^ b0_eff_176;
+wire p1_176 = a[353] ^ b[353];
+wire g0_176, g1_176, t0_176, t1_176;
+MSKand_opini2_d2 u_generate_176 (
+    .ina({a[353], a[352]}), .inb({b[353], b0_eff_176}),
+    .rnd(r[352]), .s(s[352]), .clk(clk), .out({g1_176, g0_176}));
+MSKand_opini2_d2 u_propagate_176 (
+    .ina({carry1[176], carry0[176]}), .inb({p1_176, p0_176}),
+    .rnd(r[353]), .s(s[353]), .clk(clk), .out({t1_176, t0_176}));
+assign carry0[177] = g0_176 ^ t0_176;
+assign carry1[177] = g1_176 ^ t1_176;
+assign sum[352]   = p0_176 ^ carry0[176];
+assign sum[353] = p1_176 ^ carry1[176];
+
+// ---- bit 177 ----
+wire b0_eff_177 = b[354] ^ sub;
+wire p0_177 = a[354]   ^ b0_eff_177;
+wire p1_177 = a[355] ^ b[355];
+wire g0_177, g1_177, t0_177, t1_177;
+MSKand_opini2_d2 u_generate_177 (
+    .ina({a[355], a[354]}), .inb({b[355], b0_eff_177}),
+    .rnd(r[354]), .s(s[354]), .clk(clk), .out({g1_177, g0_177}));
+MSKand_opini2_d2 u_propagate_177 (
+    .ina({carry1[177], carry0[177]}), .inb({p1_177, p0_177}),
+    .rnd(r[355]), .s(s[355]), .clk(clk), .out({t1_177, t0_177}));
+assign carry0[178] = g0_177 ^ t0_177;
+assign carry1[178] = g1_177 ^ t1_177;
+assign sum[354]   = p0_177 ^ carry0[177];
+assign sum[355] = p1_177 ^ carry1[177];
+
+// ---- bit 178 ----
+wire b0_eff_178 = b[356] ^ sub;
+wire p0_178 = a[356]   ^ b0_eff_178;
+wire p1_178 = a[357] ^ b[357];
+wire g0_178, g1_178, t0_178, t1_178;
+MSKand_opini2_d2 u_generate_178 (
+    .ina({a[357], a[356]}), .inb({b[357], b0_eff_178}),
+    .rnd(r[356]), .s(s[356]), .clk(clk), .out({g1_178, g0_178}));
+MSKand_opini2_d2 u_propagate_178 (
+    .ina({carry1[178], carry0[178]}), .inb({p1_178, p0_178}),
+    .rnd(r[357]), .s(s[357]), .clk(clk), .out({t1_178, t0_178}));
+assign carry0[179] = g0_178 ^ t0_178;
+assign carry1[179] = g1_178 ^ t1_178;
+assign sum[356]   = p0_178 ^ carry0[178];
+assign sum[357] = p1_178 ^ carry1[178];
+
+// ---- bit 179 ----
+wire b0_eff_179 = b[358] ^ sub;
+wire p0_179 = a[358]   ^ b0_eff_179;
+wire p1_179 = a[359] ^ b[359];
+wire g0_179, g1_179, t0_179, t1_179;
+MSKand_opini2_d2 u_generate_179 (
+    .ina({a[359], a[358]}), .inb({b[359], b0_eff_179}),
+    .rnd(r[358]), .s(s[358]), .clk(clk), .out({g1_179, g0_179}));
+MSKand_opini2_d2 u_propagate_179 (
+    .ina({carry1[179], carry0[179]}), .inb({p1_179, p0_179}),
+    .rnd(r[359]), .s(s[359]), .clk(clk), .out({t1_179, t0_179}));
+assign carry0[180] = g0_179 ^ t0_179;
+assign carry1[180] = g1_179 ^ t1_179;
+assign sum[358]   = p0_179 ^ carry0[179];
+assign sum[359] = p1_179 ^ carry1[179];
+
+// ---- bit 180 ----
+wire b0_eff_180 = b[360] ^ sub;
+wire p0_180 = a[360]   ^ b0_eff_180;
+wire p1_180 = a[361] ^ b[361];
+wire g0_180, g1_180, t0_180, t1_180;
+MSKand_opini2_d2 u_generate_180 (
+    .ina({a[361], a[360]}), .inb({b[361], b0_eff_180}),
+    .rnd(r[360]), .s(s[360]), .clk(clk), .out({g1_180, g0_180}));
+MSKand_opini2_d2 u_propagate_180 (
+    .ina({carry1[180], carry0[180]}), .inb({p1_180, p0_180}),
+    .rnd(r[361]), .s(s[361]), .clk(clk), .out({t1_180, t0_180}));
+assign carry0[181] = g0_180 ^ t0_180;
+assign carry1[181] = g1_180 ^ t1_180;
+assign sum[360]   = p0_180 ^ carry0[180];
+assign sum[361] = p1_180 ^ carry1[180];
+
+// ---- bit 181 ----
+wire b0_eff_181 = b[362] ^ sub;
+wire p0_181 = a[362]   ^ b0_eff_181;
+wire p1_181 = a[363] ^ b[363];
+wire g0_181, g1_181, t0_181, t1_181;
+MSKand_opini2_d2 u_generate_181 (
+    .ina({a[363], a[362]}), .inb({b[363], b0_eff_181}),
+    .rnd(r[362]), .s(s[362]), .clk(clk), .out({g1_181, g0_181}));
+MSKand_opini2_d2 u_propagate_181 (
+    .ina({carry1[181], carry0[181]}), .inb({p1_181, p0_181}),
+    .rnd(r[363]), .s(s[363]), .clk(clk), .out({t1_181, t0_181}));
+assign carry0[182] = g0_181 ^ t0_181;
+assign carry1[182] = g1_181 ^ t1_181;
+assign sum[362]   = p0_181 ^ carry0[181];
+assign sum[363] = p1_181 ^ carry1[181];
+
+// ---- bit 182 ----
+wire b0_eff_182 = b[364] ^ sub;
+wire p0_182 = a[364]   ^ b0_eff_182;
+wire p1_182 = a[365] ^ b[365];
+wire g0_182, g1_182, t0_182, t1_182;
+MSKand_opini2_d2 u_generate_182 (
+    .ina({a[365], a[364]}), .inb({b[365], b0_eff_182}),
+    .rnd(r[364]), .s(s[364]), .clk(clk), .out({g1_182, g0_182}));
+MSKand_opini2_d2 u_propagate_182 (
+    .ina({carry1[182], carry0[182]}), .inb({p1_182, p0_182}),
+    .rnd(r[365]), .s(s[365]), .clk(clk), .out({t1_182, t0_182}));
+assign carry0[183] = g0_182 ^ t0_182;
+assign carry1[183] = g1_182 ^ t1_182;
+assign sum[364]   = p0_182 ^ carry0[182];
+assign sum[365] = p1_182 ^ carry1[182];
+
+// ---- bit 183 ----
+wire b0_eff_183 = b[366] ^ sub;
+wire p0_183 = a[366]   ^ b0_eff_183;
+wire p1_183 = a[367] ^ b[367];
+wire g0_183, g1_183, t0_183, t1_183;
+MSKand_opini2_d2 u_generate_183 (
+    .ina({a[367], a[366]}), .inb({b[367], b0_eff_183}),
+    .rnd(r[366]), .s(s[366]), .clk(clk), .out({g1_183, g0_183}));
+MSKand_opini2_d2 u_propagate_183 (
+    .ina({carry1[183], carry0[183]}), .inb({p1_183, p0_183}),
+    .rnd(r[367]), .s(s[367]), .clk(clk), .out({t1_183, t0_183}));
+assign carry0[184] = g0_183 ^ t0_183;
+assign carry1[184] = g1_183 ^ t1_183;
+assign sum[366]   = p0_183 ^ carry0[183];
+assign sum[367] = p1_183 ^ carry1[183];
+
+// ---- bit 184 ----
+wire b0_eff_184 = b[368] ^ sub;
+wire p0_184 = a[368]   ^ b0_eff_184;
+wire p1_184 = a[369] ^ b[369];
+wire g0_184, g1_184, t0_184, t1_184;
+MSKand_opini2_d2 u_generate_184 (
+    .ina({a[369], a[368]}), .inb({b[369], b0_eff_184}),
+    .rnd(r[368]), .s(s[368]), .clk(clk), .out({g1_184, g0_184}));
+MSKand_opini2_d2 u_propagate_184 (
+    .ina({carry1[184], carry0[184]}), .inb({p1_184, p0_184}),
+    .rnd(r[369]), .s(s[369]), .clk(clk), .out({t1_184, t0_184}));
+assign carry0[185] = g0_184 ^ t0_184;
+assign carry1[185] = g1_184 ^ t1_184;
+assign sum[368]   = p0_184 ^ carry0[184];
+assign sum[369] = p1_184 ^ carry1[184];
+
+// ---- bit 185 ----
+wire b0_eff_185 = b[370] ^ sub;
+wire p0_185 = a[370]   ^ b0_eff_185;
+wire p1_185 = a[371] ^ b[371];
+wire g0_185, g1_185, t0_185, t1_185;
+MSKand_opini2_d2 u_generate_185 (
+    .ina({a[371], a[370]}), .inb({b[371], b0_eff_185}),
+    .rnd(r[370]), .s(s[370]), .clk(clk), .out({g1_185, g0_185}));
+MSKand_opini2_d2 u_propagate_185 (
+    .ina({carry1[185], carry0[185]}), .inb({p1_185, p0_185}),
+    .rnd(r[371]), .s(s[371]), .clk(clk), .out({t1_185, t0_185}));
+assign carry0[186] = g0_185 ^ t0_185;
+assign carry1[186] = g1_185 ^ t1_185;
+assign sum[370]   = p0_185 ^ carry0[185];
+assign sum[371] = p1_185 ^ carry1[185];
+
+// ---- bit 186 ----
+wire b0_eff_186 = b[372] ^ sub;
+wire p0_186 = a[372]   ^ b0_eff_186;
+wire p1_186 = a[373] ^ b[373];
+wire g0_186, g1_186, t0_186, t1_186;
+MSKand_opini2_d2 u_generate_186 (
+    .ina({a[373], a[372]}), .inb({b[373], b0_eff_186}),
+    .rnd(r[372]), .s(s[372]), .clk(clk), .out({g1_186, g0_186}));
+MSKand_opini2_d2 u_propagate_186 (
+    .ina({carry1[186], carry0[186]}), .inb({p1_186, p0_186}),
+    .rnd(r[373]), .s(s[373]), .clk(clk), .out({t1_186, t0_186}));
+assign carry0[187] = g0_186 ^ t0_186;
+assign carry1[187] = g1_186 ^ t1_186;
+assign sum[372]   = p0_186 ^ carry0[186];
+assign sum[373] = p1_186 ^ carry1[186];
+
+// ---- bit 187 ----
+wire b0_eff_187 = b[374] ^ sub;
+wire p0_187 = a[374]   ^ b0_eff_187;
+wire p1_187 = a[375] ^ b[375];
+wire g0_187, g1_187, t0_187, t1_187;
+MSKand_opini2_d2 u_generate_187 (
+    .ina({a[375], a[374]}), .inb({b[375], b0_eff_187}),
+    .rnd(r[374]), .s(s[374]), .clk(clk), .out({g1_187, g0_187}));
+MSKand_opini2_d2 u_propagate_187 (
+    .ina({carry1[187], carry0[187]}), .inb({p1_187, p0_187}),
+    .rnd(r[375]), .s(s[375]), .clk(clk), .out({t1_187, t0_187}));
+assign carry0[188] = g0_187 ^ t0_187;
+assign carry1[188] = g1_187 ^ t1_187;
+assign sum[374]   = p0_187 ^ carry0[187];
+assign sum[375] = p1_187 ^ carry1[187];
+
+// ---- bit 188 ----
+wire b0_eff_188 = b[376] ^ sub;
+wire p0_188 = a[376]   ^ b0_eff_188;
+wire p1_188 = a[377] ^ b[377];
+wire g0_188, g1_188, t0_188, t1_188;
+MSKand_opini2_d2 u_generate_188 (
+    .ina({a[377], a[376]}), .inb({b[377], b0_eff_188}),
+    .rnd(r[376]), .s(s[376]), .clk(clk), .out({g1_188, g0_188}));
+MSKand_opini2_d2 u_propagate_188 (
+    .ina({carry1[188], carry0[188]}), .inb({p1_188, p0_188}),
+    .rnd(r[377]), .s(s[377]), .clk(clk), .out({t1_188, t0_188}));
+assign carry0[189] = g0_188 ^ t0_188;
+assign carry1[189] = g1_188 ^ t1_188;
+assign sum[376]   = p0_188 ^ carry0[188];
+assign sum[377] = p1_188 ^ carry1[188];
+
+// ---- bit 189 ----
+wire b0_eff_189 = b[378] ^ sub;
+wire p0_189 = a[378]   ^ b0_eff_189;
+wire p1_189 = a[379] ^ b[379];
+wire g0_189, g1_189, t0_189, t1_189;
+MSKand_opini2_d2 u_generate_189 (
+    .ina({a[379], a[378]}), .inb({b[379], b0_eff_189}),
+    .rnd(r[378]), .s(s[378]), .clk(clk), .out({g1_189, g0_189}));
+MSKand_opini2_d2 u_propagate_189 (
+    .ina({carry1[189], carry0[189]}), .inb({p1_189, p0_189}),
+    .rnd(r[379]), .s(s[379]), .clk(clk), .out({t1_189, t0_189}));
+assign carry0[190] = g0_189 ^ t0_189;
+assign carry1[190] = g1_189 ^ t1_189;
+assign sum[378]   = p0_189 ^ carry0[189];
+assign sum[379] = p1_189 ^ carry1[189];
+
+// ---- bit 190 ----
+wire b0_eff_190 = b[380] ^ sub;
+wire p0_190 = a[380]   ^ b0_eff_190;
+wire p1_190 = a[381] ^ b[381];
+wire g0_190, g1_190, t0_190, t1_190;
+MSKand_opini2_d2 u_generate_190 (
+    .ina({a[381], a[380]}), .inb({b[381], b0_eff_190}),
+    .rnd(r[380]), .s(s[380]), .clk(clk), .out({g1_190, g0_190}));
+MSKand_opini2_d2 u_propagate_190 (
+    .ina({carry1[190], carry0[190]}), .inb({p1_190, p0_190}),
+    .rnd(r[381]), .s(s[381]), .clk(clk), .out({t1_190, t0_190}));
+assign carry0[191] = g0_190 ^ t0_190;
+assign carry1[191] = g1_190 ^ t1_190;
+assign sum[380]   = p0_190 ^ carry0[190];
+assign sum[381] = p1_190 ^ carry1[190];
+
+// ---- bit 191 ----
+wire b0_eff_191 = b[382] ^ sub;
+wire p0_191 = a[382]   ^ b0_eff_191;
+wire p1_191 = a[383] ^ b[383];
+wire g0_191, g1_191, t0_191, t1_191;
+MSKand_opini2_d2 u_generate_191 (
+    .ina({a[383], a[382]}), .inb({b[383], b0_eff_191}),
+    .rnd(r[382]), .s(s[382]), .clk(clk), .out({g1_191, g0_191}));
+MSKand_opini2_d2 u_propagate_191 (
+    .ina({carry1[191], carry0[191]}), .inb({p1_191, p0_191}),
+    .rnd(r[383]), .s(s[383]), .clk(clk), .out({t1_191, t0_191}));
+assign carry0[192] = g0_191 ^ t0_191;
+assign carry1[192] = g1_191 ^ t1_191;
+assign sum[382]   = p0_191 ^ carry0[191];
+assign sum[383] = p1_191 ^ carry1[191];
+
+// ---- bit 192 ----
+wire b0_eff_192 = b[384] ^ sub;
+wire p0_192 = a[384]   ^ b0_eff_192;
+wire p1_192 = a[385] ^ b[385];
+wire g0_192, g1_192, t0_192, t1_192;
+MSKand_opini2_d2 u_generate_192 (
+    .ina({a[385], a[384]}), .inb({b[385], b0_eff_192}),
+    .rnd(r[384]), .s(s[384]), .clk(clk), .out({g1_192, g0_192}));
+MSKand_opini2_d2 u_propagate_192 (
+    .ina({carry1[192], carry0[192]}), .inb({p1_192, p0_192}),
+    .rnd(r[385]), .s(s[385]), .clk(clk), .out({t1_192, t0_192}));
+assign carry0[193] = g0_192 ^ t0_192;
+assign carry1[193] = g1_192 ^ t1_192;
+assign sum[384]   = p0_192 ^ carry0[192];
+assign sum[385] = p1_192 ^ carry1[192];
+
+// ---- bit 193 ----
+wire b0_eff_193 = b[386] ^ sub;
+wire p0_193 = a[386]   ^ b0_eff_193;
+wire p1_193 = a[387] ^ b[387];
+wire g0_193, g1_193, t0_193, t1_193;
+MSKand_opini2_d2 u_generate_193 (
+    .ina({a[387], a[386]}), .inb({b[387], b0_eff_193}),
+    .rnd(r[386]), .s(s[386]), .clk(clk), .out({g1_193, g0_193}));
+MSKand_opini2_d2 u_propagate_193 (
+    .ina({carry1[193], carry0[193]}), .inb({p1_193, p0_193}),
+    .rnd(r[387]), .s(s[387]), .clk(clk), .out({t1_193, t0_193}));
+assign carry0[194] = g0_193 ^ t0_193;
+assign carry1[194] = g1_193 ^ t1_193;
+assign sum[386]   = p0_193 ^ carry0[193];
+assign sum[387] = p1_193 ^ carry1[193];
+
+// ---- bit 194 ----
+wire b0_eff_194 = b[388] ^ sub;
+wire p0_194 = a[388]   ^ b0_eff_194;
+wire p1_194 = a[389] ^ b[389];
+wire g0_194, g1_194, t0_194, t1_194;
+MSKand_opini2_d2 u_generate_194 (
+    .ina({a[389], a[388]}), .inb({b[389], b0_eff_194}),
+    .rnd(r[388]), .s(s[388]), .clk(clk), .out({g1_194, g0_194}));
+MSKand_opini2_d2 u_propagate_194 (
+    .ina({carry1[194], carry0[194]}), .inb({p1_194, p0_194}),
+    .rnd(r[389]), .s(s[389]), .clk(clk), .out({t1_194, t0_194}));
+assign carry0[195] = g0_194 ^ t0_194;
+assign carry1[195] = g1_194 ^ t1_194;
+assign sum[388]   = p0_194 ^ carry0[194];
+assign sum[389] = p1_194 ^ carry1[194];
+
+// ---- bit 195 ----
+wire b0_eff_195 = b[390] ^ sub;
+wire p0_195 = a[390]   ^ b0_eff_195;
+wire p1_195 = a[391] ^ b[391];
+wire g0_195, g1_195, t0_195, t1_195;
+MSKand_opini2_d2 u_generate_195 (
+    .ina({a[391], a[390]}), .inb({b[391], b0_eff_195}),
+    .rnd(r[390]), .s(s[390]), .clk(clk), .out({g1_195, g0_195}));
+MSKand_opini2_d2 u_propagate_195 (
+    .ina({carry1[195], carry0[195]}), .inb({p1_195, p0_195}),
+    .rnd(r[391]), .s(s[391]), .clk(clk), .out({t1_195, t0_195}));
+assign carry0[196] = g0_195 ^ t0_195;
+assign carry1[196] = g1_195 ^ t1_195;
+assign sum[390]   = p0_195 ^ carry0[195];
+assign sum[391] = p1_195 ^ carry1[195];
+
+// ---- bit 196 ----
+wire b0_eff_196 = b[392] ^ sub;
+wire p0_196 = a[392]   ^ b0_eff_196;
+wire p1_196 = a[393] ^ b[393];
+wire g0_196, g1_196, t0_196, t1_196;
+MSKand_opini2_d2 u_generate_196 (
+    .ina({a[393], a[392]}), .inb({b[393], b0_eff_196}),
+    .rnd(r[392]), .s(s[392]), .clk(clk), .out({g1_196, g0_196}));
+MSKand_opini2_d2 u_propagate_196 (
+    .ina({carry1[196], carry0[196]}), .inb({p1_196, p0_196}),
+    .rnd(r[393]), .s(s[393]), .clk(clk), .out({t1_196, t0_196}));
+assign carry0[197] = g0_196 ^ t0_196;
+assign carry1[197] = g1_196 ^ t1_196;
+assign sum[392]   = p0_196 ^ carry0[196];
+assign sum[393] = p1_196 ^ carry1[196];
+
+// ---- bit 197 ----
+wire b0_eff_197 = b[394] ^ sub;
+wire p0_197 = a[394]   ^ b0_eff_197;
+wire p1_197 = a[395] ^ b[395];
+wire g0_197, g1_197, t0_197, t1_197;
+MSKand_opini2_d2 u_generate_197 (
+    .ina({a[395], a[394]}), .inb({b[395], b0_eff_197}),
+    .rnd(r[394]), .s(s[394]), .clk(clk), .out({g1_197, g0_197}));
+MSKand_opini2_d2 u_propagate_197 (
+    .ina({carry1[197], carry0[197]}), .inb({p1_197, p0_197}),
+    .rnd(r[395]), .s(s[395]), .clk(clk), .out({t1_197, t0_197}));
+assign carry0[198] = g0_197 ^ t0_197;
+assign carry1[198] = g1_197 ^ t1_197;
+assign sum[394]   = p0_197 ^ carry0[197];
+assign sum[395] = p1_197 ^ carry1[197];
+
+// ---- bit 198 ----
+wire b0_eff_198 = b[396] ^ sub;
+wire p0_198 = a[396]   ^ b0_eff_198;
+wire p1_198 = a[397] ^ b[397];
+wire g0_198, g1_198, t0_198, t1_198;
+MSKand_opini2_d2 u_generate_198 (
+    .ina({a[397], a[396]}), .inb({b[397], b0_eff_198}),
+    .rnd(r[396]), .s(s[396]), .clk(clk), .out({g1_198, g0_198}));
+MSKand_opini2_d2 u_propagate_198 (
+    .ina({carry1[198], carry0[198]}), .inb({p1_198, p0_198}),
+    .rnd(r[397]), .s(s[397]), .clk(clk), .out({t1_198, t0_198}));
+assign carry0[199] = g0_198 ^ t0_198;
+assign carry1[199] = g1_198 ^ t1_198;
+assign sum[396]   = p0_198 ^ carry0[198];
+assign sum[397] = p1_198 ^ carry1[198];
+
+// ---- bit 199 ----
+wire b0_eff_199 = b[398] ^ sub;
+wire p0_199 = a[398]   ^ b0_eff_199;
+wire p1_199 = a[399] ^ b[399];
+wire g0_199, g1_199, t0_199, t1_199;
+MSKand_opini2_d2 u_generate_199 (
+    .ina({a[399], a[398]}), .inb({b[399], b0_eff_199}),
+    .rnd(r[398]), .s(s[398]), .clk(clk), .out({g1_199, g0_199}));
+MSKand_opini2_d2 u_propagate_199 (
+    .ina({carry1[199], carry0[199]}), .inb({p1_199, p0_199}),
+    .rnd(r[399]), .s(s[399]), .clk(clk), .out({t1_199, t0_199}));
+assign carry0[200] = g0_199 ^ t0_199;
+assign carry1[200] = g1_199 ^ t1_199;
+assign sum[398]   = p0_199 ^ carry0[199];
+assign sum[399] = p1_199 ^ carry1[199];
+
+// ---- bit 200 ----
+wire b0_eff_200 = b[400] ^ sub;
+wire p0_200 = a[400]   ^ b0_eff_200;
+wire p1_200 = a[401] ^ b[401];
+wire g0_200, g1_200, t0_200, t1_200;
+MSKand_opini2_d2 u_generate_200 (
+    .ina({a[401], a[400]}), .inb({b[401], b0_eff_200}),
+    .rnd(r[400]), .s(s[400]), .clk(clk), .out({g1_200, g0_200}));
+MSKand_opini2_d2 u_propagate_200 (
+    .ina({carry1[200], carry0[200]}), .inb({p1_200, p0_200}),
+    .rnd(r[401]), .s(s[401]), .clk(clk), .out({t1_200, t0_200}));
+assign carry0[201] = g0_200 ^ t0_200;
+assign carry1[201] = g1_200 ^ t1_200;
+assign sum[400]   = p0_200 ^ carry0[200];
+assign sum[401] = p1_200 ^ carry1[200];
+
+// ---- bit 201 ----
+wire b0_eff_201 = b[402] ^ sub;
+wire p0_201 = a[402]   ^ b0_eff_201;
+wire p1_201 = a[403] ^ b[403];
+wire g0_201, g1_201, t0_201, t1_201;
+MSKand_opini2_d2 u_generate_201 (
+    .ina({a[403], a[402]}), .inb({b[403], b0_eff_201}),
+    .rnd(r[402]), .s(s[402]), .clk(clk), .out({g1_201, g0_201}));
+MSKand_opini2_d2 u_propagate_201 (
+    .ina({carry1[201], carry0[201]}), .inb({p1_201, p0_201}),
+    .rnd(r[403]), .s(s[403]), .clk(clk), .out({t1_201, t0_201}));
+assign carry0[202] = g0_201 ^ t0_201;
+assign carry1[202] = g1_201 ^ t1_201;
+assign sum[402]   = p0_201 ^ carry0[201];
+assign sum[403] = p1_201 ^ carry1[201];
+
+// ---- bit 202 ----
+wire b0_eff_202 = b[404] ^ sub;
+wire p0_202 = a[404]   ^ b0_eff_202;
+wire p1_202 = a[405] ^ b[405];
+wire g0_202, g1_202, t0_202, t1_202;
+MSKand_opini2_d2 u_generate_202 (
+    .ina({a[405], a[404]}), .inb({b[405], b0_eff_202}),
+    .rnd(r[404]), .s(s[404]), .clk(clk), .out({g1_202, g0_202}));
+MSKand_opini2_d2 u_propagate_202 (
+    .ina({carry1[202], carry0[202]}), .inb({p1_202, p0_202}),
+    .rnd(r[405]), .s(s[405]), .clk(clk), .out({t1_202, t0_202}));
+assign carry0[203] = g0_202 ^ t0_202;
+assign carry1[203] = g1_202 ^ t1_202;
+assign sum[404]   = p0_202 ^ carry0[202];
+assign sum[405] = p1_202 ^ carry1[202];
+
+// ---- bit 203 ----
+wire b0_eff_203 = b[406] ^ sub;
+wire p0_203 = a[406]   ^ b0_eff_203;
+wire p1_203 = a[407] ^ b[407];
+wire g0_203, g1_203, t0_203, t1_203;
+MSKand_opini2_d2 u_generate_203 (
+    .ina({a[407], a[406]}), .inb({b[407], b0_eff_203}),
+    .rnd(r[406]), .s(s[406]), .clk(clk), .out({g1_203, g0_203}));
+MSKand_opini2_d2 u_propagate_203 (
+    .ina({carry1[203], carry0[203]}), .inb({p1_203, p0_203}),
+    .rnd(r[407]), .s(s[407]), .clk(clk), .out({t1_203, t0_203}));
+assign carry0[204] = g0_203 ^ t0_203;
+assign carry1[204] = g1_203 ^ t1_203;
+assign sum[406]   = p0_203 ^ carry0[203];
+assign sum[407] = p1_203 ^ carry1[203];
+
+// ---- bit 204 ----
+wire b0_eff_204 = b[408] ^ sub;
+wire p0_204 = a[408]   ^ b0_eff_204;
+wire p1_204 = a[409] ^ b[409];
+wire g0_204, g1_204, t0_204, t1_204;
+MSKand_opini2_d2 u_generate_204 (
+    .ina({a[409], a[408]}), .inb({b[409], b0_eff_204}),
+    .rnd(r[408]), .s(s[408]), .clk(clk), .out({g1_204, g0_204}));
+MSKand_opini2_d2 u_propagate_204 (
+    .ina({carry1[204], carry0[204]}), .inb({p1_204, p0_204}),
+    .rnd(r[409]), .s(s[409]), .clk(clk), .out({t1_204, t0_204}));
+assign carry0[205] = g0_204 ^ t0_204;
+assign carry1[205] = g1_204 ^ t1_204;
+assign sum[408]   = p0_204 ^ carry0[204];
+assign sum[409] = p1_204 ^ carry1[204];
+
+// ---- bit 205 ----
+wire b0_eff_205 = b[410] ^ sub;
+wire p0_205 = a[410]   ^ b0_eff_205;
+wire p1_205 = a[411] ^ b[411];
+wire g0_205, g1_205, t0_205, t1_205;
+MSKand_opini2_d2 u_generate_205 (
+    .ina({a[411], a[410]}), .inb({b[411], b0_eff_205}),
+    .rnd(r[410]), .s(s[410]), .clk(clk), .out({g1_205, g0_205}));
+MSKand_opini2_d2 u_propagate_205 (
+    .ina({carry1[205], carry0[205]}), .inb({p1_205, p0_205}),
+    .rnd(r[411]), .s(s[411]), .clk(clk), .out({t1_205, t0_205}));
+assign carry0[206] = g0_205 ^ t0_205;
+assign carry1[206] = g1_205 ^ t1_205;
+assign sum[410]   = p0_205 ^ carry0[205];
+assign sum[411] = p1_205 ^ carry1[205];
+
+// ---- bit 206 ----
+wire b0_eff_206 = b[412] ^ sub;
+wire p0_206 = a[412]   ^ b0_eff_206;
+wire p1_206 = a[413] ^ b[413];
+wire g0_206, g1_206, t0_206, t1_206;
+MSKand_opini2_d2 u_generate_206 (
+    .ina({a[413], a[412]}), .inb({b[413], b0_eff_206}),
+    .rnd(r[412]), .s(s[412]), .clk(clk), .out({g1_206, g0_206}));
+MSKand_opini2_d2 u_propagate_206 (
+    .ina({carry1[206], carry0[206]}), .inb({p1_206, p0_206}),
+    .rnd(r[413]), .s(s[413]), .clk(clk), .out({t1_206, t0_206}));
+assign carry0[207] = g0_206 ^ t0_206;
+assign carry1[207] = g1_206 ^ t1_206;
+assign sum[412]   = p0_206 ^ carry0[206];
+assign sum[413] = p1_206 ^ carry1[206];
+
+// ---- bit 207 ----
+wire b0_eff_207 = b[414] ^ sub;
+wire p0_207 = a[414]   ^ b0_eff_207;
+wire p1_207 = a[415] ^ b[415];
+wire g0_207, g1_207, t0_207, t1_207;
+MSKand_opini2_d2 u_generate_207 (
+    .ina({a[415], a[414]}), .inb({b[415], b0_eff_207}),
+    .rnd(r[414]), .s(s[414]), .clk(clk), .out({g1_207, g0_207}));
+MSKand_opini2_d2 u_propagate_207 (
+    .ina({carry1[207], carry0[207]}), .inb({p1_207, p0_207}),
+    .rnd(r[415]), .s(s[415]), .clk(clk), .out({t1_207, t0_207}));
+assign carry0[208] = g0_207 ^ t0_207;
+assign carry1[208] = g1_207 ^ t1_207;
+assign sum[414]   = p0_207 ^ carry0[207];
+assign sum[415] = p1_207 ^ carry1[207];
+
+// ---- bit 208 ----
+wire b0_eff_208 = b[416] ^ sub;
+wire p0_208 = a[416]   ^ b0_eff_208;
+wire p1_208 = a[417] ^ b[417];
+wire g0_208, g1_208, t0_208, t1_208;
+MSKand_opini2_d2 u_generate_208 (
+    .ina({a[417], a[416]}), .inb({b[417], b0_eff_208}),
+    .rnd(r[416]), .s(s[416]), .clk(clk), .out({g1_208, g0_208}));
+MSKand_opini2_d2 u_propagate_208 (
+    .ina({carry1[208], carry0[208]}), .inb({p1_208, p0_208}),
+    .rnd(r[417]), .s(s[417]), .clk(clk), .out({t1_208, t0_208}));
+assign carry0[209] = g0_208 ^ t0_208;
+assign carry1[209] = g1_208 ^ t1_208;
+assign sum[416]   = p0_208 ^ carry0[208];
+assign sum[417] = p1_208 ^ carry1[208];
+
+// ---- bit 209 ----
+wire b0_eff_209 = b[418] ^ sub;
+wire p0_209 = a[418]   ^ b0_eff_209;
+wire p1_209 = a[419] ^ b[419];
+wire g0_209, g1_209, t0_209, t1_209;
+MSKand_opini2_d2 u_generate_209 (
+    .ina({a[419], a[418]}), .inb({b[419], b0_eff_209}),
+    .rnd(r[418]), .s(s[418]), .clk(clk), .out({g1_209, g0_209}));
+MSKand_opini2_d2 u_propagate_209 (
+    .ina({carry1[209], carry0[209]}), .inb({p1_209, p0_209}),
+    .rnd(r[419]), .s(s[419]), .clk(clk), .out({t1_209, t0_209}));
+assign carry0[210] = g0_209 ^ t0_209;
+assign carry1[210] = g1_209 ^ t1_209;
+assign sum[418]   = p0_209 ^ carry0[209];
+assign sum[419] = p1_209 ^ carry1[209];
+
+// ---- bit 210 ----
+wire b0_eff_210 = b[420] ^ sub;
+wire p0_210 = a[420]   ^ b0_eff_210;
+wire p1_210 = a[421] ^ b[421];
+wire g0_210, g1_210, t0_210, t1_210;
+MSKand_opini2_d2 u_generate_210 (
+    .ina({a[421], a[420]}), .inb({b[421], b0_eff_210}),
+    .rnd(r[420]), .s(s[420]), .clk(clk), .out({g1_210, g0_210}));
+MSKand_opini2_d2 u_propagate_210 (
+    .ina({carry1[210], carry0[210]}), .inb({p1_210, p0_210}),
+    .rnd(r[421]), .s(s[421]), .clk(clk), .out({t1_210, t0_210}));
+assign carry0[211] = g0_210 ^ t0_210;
+assign carry1[211] = g1_210 ^ t1_210;
+assign sum[420]   = p0_210 ^ carry0[210];
+assign sum[421] = p1_210 ^ carry1[210];
+
+// ---- bit 211 ----
+wire b0_eff_211 = b[422] ^ sub;
+wire p0_211 = a[422]   ^ b0_eff_211;
+wire p1_211 = a[423] ^ b[423];
+wire g0_211, g1_211, t0_211, t1_211;
+MSKand_opini2_d2 u_generate_211 (
+    .ina({a[423], a[422]}), .inb({b[423], b0_eff_211}),
+    .rnd(r[422]), .s(s[422]), .clk(clk), .out({g1_211, g0_211}));
+MSKand_opini2_d2 u_propagate_211 (
+    .ina({carry1[211], carry0[211]}), .inb({p1_211, p0_211}),
+    .rnd(r[423]), .s(s[423]), .clk(clk), .out({t1_211, t0_211}));
+assign carry0[212] = g0_211 ^ t0_211;
+assign carry1[212] = g1_211 ^ t1_211;
+assign sum[422]   = p0_211 ^ carry0[211];
+assign sum[423] = p1_211 ^ carry1[211];
+
+// ---- bit 212 ----
+wire b0_eff_212 = b[424] ^ sub;
+wire p0_212 = a[424]   ^ b0_eff_212;
+wire p1_212 = a[425] ^ b[425];
+wire g0_212, g1_212, t0_212, t1_212;
+MSKand_opini2_d2 u_generate_212 (
+    .ina({a[425], a[424]}), .inb({b[425], b0_eff_212}),
+    .rnd(r[424]), .s(s[424]), .clk(clk), .out({g1_212, g0_212}));
+MSKand_opini2_d2 u_propagate_212 (
+    .ina({carry1[212], carry0[212]}), .inb({p1_212, p0_212}),
+    .rnd(r[425]), .s(s[425]), .clk(clk), .out({t1_212, t0_212}));
+assign carry0[213] = g0_212 ^ t0_212;
+assign carry1[213] = g1_212 ^ t1_212;
+assign sum[424]   = p0_212 ^ carry0[212];
+assign sum[425] = p1_212 ^ carry1[212];
+
+// ---- bit 213 ----
+wire b0_eff_213 = b[426] ^ sub;
+wire p0_213 = a[426]   ^ b0_eff_213;
+wire p1_213 = a[427] ^ b[427];
+wire g0_213, g1_213, t0_213, t1_213;
+MSKand_opini2_d2 u_generate_213 (
+    .ina({a[427], a[426]}), .inb({b[427], b0_eff_213}),
+    .rnd(r[426]), .s(s[426]), .clk(clk), .out({g1_213, g0_213}));
+MSKand_opini2_d2 u_propagate_213 (
+    .ina({carry1[213], carry0[213]}), .inb({p1_213, p0_213}),
+    .rnd(r[427]), .s(s[427]), .clk(clk), .out({t1_213, t0_213}));
+assign carry0[214] = g0_213 ^ t0_213;
+assign carry1[214] = g1_213 ^ t1_213;
+assign sum[426]   = p0_213 ^ carry0[213];
+assign sum[427] = p1_213 ^ carry1[213];
+
+// ---- bit 214 ----
+wire b0_eff_214 = b[428] ^ sub;
+wire p0_214 = a[428]   ^ b0_eff_214;
+wire p1_214 = a[429] ^ b[429];
+wire g0_214, g1_214, t0_214, t1_214;
+MSKand_opini2_d2 u_generate_214 (
+    .ina({a[429], a[428]}), .inb({b[429], b0_eff_214}),
+    .rnd(r[428]), .s(s[428]), .clk(clk), .out({g1_214, g0_214}));
+MSKand_opini2_d2 u_propagate_214 (
+    .ina({carry1[214], carry0[214]}), .inb({p1_214, p0_214}),
+    .rnd(r[429]), .s(s[429]), .clk(clk), .out({t1_214, t0_214}));
+assign carry0[215] = g0_214 ^ t0_214;
+assign carry1[215] = g1_214 ^ t1_214;
+assign sum[428]   = p0_214 ^ carry0[214];
+assign sum[429] = p1_214 ^ carry1[214];
+
+// ---- bit 215 ----
+wire b0_eff_215 = b[430] ^ sub;
+wire p0_215 = a[430]   ^ b0_eff_215;
+wire p1_215 = a[431] ^ b[431];
+wire g0_215, g1_215, t0_215, t1_215;
+MSKand_opini2_d2 u_generate_215 (
+    .ina({a[431], a[430]}), .inb({b[431], b0_eff_215}),
+    .rnd(r[430]), .s(s[430]), .clk(clk), .out({g1_215, g0_215}));
+MSKand_opini2_d2 u_propagate_215 (
+    .ina({carry1[215], carry0[215]}), .inb({p1_215, p0_215}),
+    .rnd(r[431]), .s(s[431]), .clk(clk), .out({t1_215, t0_215}));
+assign carry0[216] = g0_215 ^ t0_215;
+assign carry1[216] = g1_215 ^ t1_215;
+assign sum[430]   = p0_215 ^ carry0[215];
+assign sum[431] = p1_215 ^ carry1[215];
+
+// ---- bit 216 ----
+wire b0_eff_216 = b[432] ^ sub;
+wire p0_216 = a[432]   ^ b0_eff_216;
+wire p1_216 = a[433] ^ b[433];
+wire g0_216, g1_216, t0_216, t1_216;
+MSKand_opini2_d2 u_generate_216 (
+    .ina({a[433], a[432]}), .inb({b[433], b0_eff_216}),
+    .rnd(r[432]), .s(s[432]), .clk(clk), .out({g1_216, g0_216}));
+MSKand_opini2_d2 u_propagate_216 (
+    .ina({carry1[216], carry0[216]}), .inb({p1_216, p0_216}),
+    .rnd(r[433]), .s(s[433]), .clk(clk), .out({t1_216, t0_216}));
+assign carry0[217] = g0_216 ^ t0_216;
+assign carry1[217] = g1_216 ^ t1_216;
+assign sum[432]   = p0_216 ^ carry0[216];
+assign sum[433] = p1_216 ^ carry1[216];
+
+// ---- bit 217 ----
+wire b0_eff_217 = b[434] ^ sub;
+wire p0_217 = a[434]   ^ b0_eff_217;
+wire p1_217 = a[435] ^ b[435];
+wire g0_217, g1_217, t0_217, t1_217;
+MSKand_opini2_d2 u_generate_217 (
+    .ina({a[435], a[434]}), .inb({b[435], b0_eff_217}),
+    .rnd(r[434]), .s(s[434]), .clk(clk), .out({g1_217, g0_217}));
+MSKand_opini2_d2 u_propagate_217 (
+    .ina({carry1[217], carry0[217]}), .inb({p1_217, p0_217}),
+    .rnd(r[435]), .s(s[435]), .clk(clk), .out({t1_217, t0_217}));
+assign carry0[218] = g0_217 ^ t0_217;
+assign carry1[218] = g1_217 ^ t1_217;
+assign sum[434]   = p0_217 ^ carry0[217];
+assign sum[435] = p1_217 ^ carry1[217];
+
+// ---- bit 218 ----
+wire b0_eff_218 = b[436] ^ sub;
+wire p0_218 = a[436]   ^ b0_eff_218;
+wire p1_218 = a[437] ^ b[437];
+wire g0_218, g1_218, t0_218, t1_218;
+MSKand_opini2_d2 u_generate_218 (
+    .ina({a[437], a[436]}), .inb({b[437], b0_eff_218}),
+    .rnd(r[436]), .s(s[436]), .clk(clk), .out({g1_218, g0_218}));
+MSKand_opini2_d2 u_propagate_218 (
+    .ina({carry1[218], carry0[218]}), .inb({p1_218, p0_218}),
+    .rnd(r[437]), .s(s[437]), .clk(clk), .out({t1_218, t0_218}));
+assign carry0[219] = g0_218 ^ t0_218;
+assign carry1[219] = g1_218 ^ t1_218;
+assign sum[436]   = p0_218 ^ carry0[218];
+assign sum[437] = p1_218 ^ carry1[218];
+
+// ---- bit 219 ----
+wire b0_eff_219 = b[438] ^ sub;
+wire p0_219 = a[438]   ^ b0_eff_219;
+wire p1_219 = a[439] ^ b[439];
+wire g0_219, g1_219, t0_219, t1_219;
+MSKand_opini2_d2 u_generate_219 (
+    .ina({a[439], a[438]}), .inb({b[439], b0_eff_219}),
+    .rnd(r[438]), .s(s[438]), .clk(clk), .out({g1_219, g0_219}));
+MSKand_opini2_d2 u_propagate_219 (
+    .ina({carry1[219], carry0[219]}), .inb({p1_219, p0_219}),
+    .rnd(r[439]), .s(s[439]), .clk(clk), .out({t1_219, t0_219}));
+assign carry0[220] = g0_219 ^ t0_219;
+assign carry1[220] = g1_219 ^ t1_219;
+assign sum[438]   = p0_219 ^ carry0[219];
+assign sum[439] = p1_219 ^ carry1[219];
+
+// ---- bit 220 ----
+wire b0_eff_220 = b[440] ^ sub;
+wire p0_220 = a[440]   ^ b0_eff_220;
+wire p1_220 = a[441] ^ b[441];
+wire g0_220, g1_220, t0_220, t1_220;
+MSKand_opini2_d2 u_generate_220 (
+    .ina({a[441], a[440]}), .inb({b[441], b0_eff_220}),
+    .rnd(r[440]), .s(s[440]), .clk(clk), .out({g1_220, g0_220}));
+MSKand_opini2_d2 u_propagate_220 (
+    .ina({carry1[220], carry0[220]}), .inb({p1_220, p0_220}),
+    .rnd(r[441]), .s(s[441]), .clk(clk), .out({t1_220, t0_220}));
+assign carry0[221] = g0_220 ^ t0_220;
+assign carry1[221] = g1_220 ^ t1_220;
+assign sum[440]   = p0_220 ^ carry0[220];
+assign sum[441] = p1_220 ^ carry1[220];
+
+// ---- bit 221 ----
+wire b0_eff_221 = b[442] ^ sub;
+wire p0_221 = a[442]   ^ b0_eff_221;
+wire p1_221 = a[443] ^ b[443];
+wire g0_221, g1_221, t0_221, t1_221;
+MSKand_opini2_d2 u_generate_221 (
+    .ina({a[443], a[442]}), .inb({b[443], b0_eff_221}),
+    .rnd(r[442]), .s(s[442]), .clk(clk), .out({g1_221, g0_221}));
+MSKand_opini2_d2 u_propagate_221 (
+    .ina({carry1[221], carry0[221]}), .inb({p1_221, p0_221}),
+    .rnd(r[443]), .s(s[443]), .clk(clk), .out({t1_221, t0_221}));
+assign carry0[222] = g0_221 ^ t0_221;
+assign carry1[222] = g1_221 ^ t1_221;
+assign sum[442]   = p0_221 ^ carry0[221];
+assign sum[443] = p1_221 ^ carry1[221];
+
+// ---- bit 222 ----
+wire b0_eff_222 = b[444] ^ sub;
+wire p0_222 = a[444]   ^ b0_eff_222;
+wire p1_222 = a[445] ^ b[445];
+wire g0_222, g1_222, t0_222, t1_222;
+MSKand_opini2_d2 u_generate_222 (
+    .ina({a[445], a[444]}), .inb({b[445], b0_eff_222}),
+    .rnd(r[444]), .s(s[444]), .clk(clk), .out({g1_222, g0_222}));
+MSKand_opini2_d2 u_propagate_222 (
+    .ina({carry1[222], carry0[222]}), .inb({p1_222, p0_222}),
+    .rnd(r[445]), .s(s[445]), .clk(clk), .out({t1_222, t0_222}));
+assign carry0[223] = g0_222 ^ t0_222;
+assign carry1[223] = g1_222 ^ t1_222;
+assign sum[444]   = p0_222 ^ carry0[222];
+assign sum[445] = p1_222 ^ carry1[222];
+
+// ---- bit 223 ----
+wire b0_eff_223 = b[446] ^ sub;
+wire p0_223 = a[446]   ^ b0_eff_223;
+wire p1_223 = a[447] ^ b[447];
+wire g0_223, g1_223, t0_223, t1_223;
+MSKand_opini2_d2 u_generate_223 (
+    .ina({a[447], a[446]}), .inb({b[447], b0_eff_223}),
+    .rnd(r[446]), .s(s[446]), .clk(clk), .out({g1_223, g0_223}));
+MSKand_opini2_d2 u_propagate_223 (
+    .ina({carry1[223], carry0[223]}), .inb({p1_223, p0_223}),
+    .rnd(r[447]), .s(s[447]), .clk(clk), .out({t1_223, t0_223}));
+assign carry0[224] = g0_223 ^ t0_223;
+assign carry1[224] = g1_223 ^ t1_223;
+assign sum[446]   = p0_223 ^ carry0[223];
+assign sum[447] = p1_223 ^ carry1[223];
+
+// ---- bit 224 ----
+wire b0_eff_224 = b[448] ^ sub;
+wire p0_224 = a[448]   ^ b0_eff_224;
+wire p1_224 = a[449] ^ b[449];
+wire g0_224, g1_224, t0_224, t1_224;
+MSKand_opini2_d2 u_generate_224 (
+    .ina({a[449], a[448]}), .inb({b[449], b0_eff_224}),
+    .rnd(r[448]), .s(s[448]), .clk(clk), .out({g1_224, g0_224}));
+MSKand_opini2_d2 u_propagate_224 (
+    .ina({carry1[224], carry0[224]}), .inb({p1_224, p0_224}),
+    .rnd(r[449]), .s(s[449]), .clk(clk), .out({t1_224, t0_224}));
+assign carry0[225] = g0_224 ^ t0_224;
+assign carry1[225] = g1_224 ^ t1_224;
+assign sum[448]   = p0_224 ^ carry0[224];
+assign sum[449] = p1_224 ^ carry1[224];
+
+// ---- bit 225 ----
+wire b0_eff_225 = b[450] ^ sub;
+wire p0_225 = a[450]   ^ b0_eff_225;
+wire p1_225 = a[451] ^ b[451];
+wire g0_225, g1_225, t0_225, t1_225;
+MSKand_opini2_d2 u_generate_225 (
+    .ina({a[451], a[450]}), .inb({b[451], b0_eff_225}),
+    .rnd(r[450]), .s(s[450]), .clk(clk), .out({g1_225, g0_225}));
+MSKand_opini2_d2 u_propagate_225 (
+    .ina({carry1[225], carry0[225]}), .inb({p1_225, p0_225}),
+    .rnd(r[451]), .s(s[451]), .clk(clk), .out({t1_225, t0_225}));
+assign carry0[226] = g0_225 ^ t0_225;
+assign carry1[226] = g1_225 ^ t1_225;
+assign sum[450]   = p0_225 ^ carry0[225];
+assign sum[451] = p1_225 ^ carry1[225];
+
+// ---- bit 226 ----
+wire b0_eff_226 = b[452] ^ sub;
+wire p0_226 = a[452]   ^ b0_eff_226;
+wire p1_226 = a[453] ^ b[453];
+wire g0_226, g1_226, t0_226, t1_226;
+MSKand_opini2_d2 u_generate_226 (
+    .ina({a[453], a[452]}), .inb({b[453], b0_eff_226}),
+    .rnd(r[452]), .s(s[452]), .clk(clk), .out({g1_226, g0_226}));
+MSKand_opini2_d2 u_propagate_226 (
+    .ina({carry1[226], carry0[226]}), .inb({p1_226, p0_226}),
+    .rnd(r[453]), .s(s[453]), .clk(clk), .out({t1_226, t0_226}));
+assign carry0[227] = g0_226 ^ t0_226;
+assign carry1[227] = g1_226 ^ t1_226;
+assign sum[452]   = p0_226 ^ carry0[226];
+assign sum[453] = p1_226 ^ carry1[226];
+
+// ---- bit 227 ----
+wire b0_eff_227 = b[454] ^ sub;
+wire p0_227 = a[454]   ^ b0_eff_227;
+wire p1_227 = a[455] ^ b[455];
+wire g0_227, g1_227, t0_227, t1_227;
+MSKand_opini2_d2 u_generate_227 (
+    .ina({a[455], a[454]}), .inb({b[455], b0_eff_227}),
+    .rnd(r[454]), .s(s[454]), .clk(clk), .out({g1_227, g0_227}));
+MSKand_opini2_d2 u_propagate_227 (
+    .ina({carry1[227], carry0[227]}), .inb({p1_227, p0_227}),
+    .rnd(r[455]), .s(s[455]), .clk(clk), .out({t1_227, t0_227}));
+assign carry0[228] = g0_227 ^ t0_227;
+assign carry1[228] = g1_227 ^ t1_227;
+assign sum[454]   = p0_227 ^ carry0[227];
+assign sum[455] = p1_227 ^ carry1[227];
+
+// ---- bit 228 ----
+wire b0_eff_228 = b[456] ^ sub;
+wire p0_228 = a[456]   ^ b0_eff_228;
+wire p1_228 = a[457] ^ b[457];
+wire g0_228, g1_228, t0_228, t1_228;
+MSKand_opini2_d2 u_generate_228 (
+    .ina({a[457], a[456]}), .inb({b[457], b0_eff_228}),
+    .rnd(r[456]), .s(s[456]), .clk(clk), .out({g1_228, g0_228}));
+MSKand_opini2_d2 u_propagate_228 (
+    .ina({carry1[228], carry0[228]}), .inb({p1_228, p0_228}),
+    .rnd(r[457]), .s(s[457]), .clk(clk), .out({t1_228, t0_228}));
+assign carry0[229] = g0_228 ^ t0_228;
+assign carry1[229] = g1_228 ^ t1_228;
+assign sum[456]   = p0_228 ^ carry0[228];
+assign sum[457] = p1_228 ^ carry1[228];
+
+// ---- bit 229 ----
+wire b0_eff_229 = b[458] ^ sub;
+wire p0_229 = a[458]   ^ b0_eff_229;
+wire p1_229 = a[459] ^ b[459];
+wire g0_229, g1_229, t0_229, t1_229;
+MSKand_opini2_d2 u_generate_229 (
+    .ina({a[459], a[458]}), .inb({b[459], b0_eff_229}),
+    .rnd(r[458]), .s(s[458]), .clk(clk), .out({g1_229, g0_229}));
+MSKand_opini2_d2 u_propagate_229 (
+    .ina({carry1[229], carry0[229]}), .inb({p1_229, p0_229}),
+    .rnd(r[459]), .s(s[459]), .clk(clk), .out({t1_229, t0_229}));
+assign carry0[230] = g0_229 ^ t0_229;
+assign carry1[230] = g1_229 ^ t1_229;
+assign sum[458]   = p0_229 ^ carry0[229];
+assign sum[459] = p1_229 ^ carry1[229];
+
+// ---- bit 230 ----
+wire b0_eff_230 = b[460] ^ sub;
+wire p0_230 = a[460]   ^ b0_eff_230;
+wire p1_230 = a[461] ^ b[461];
+wire g0_230, g1_230, t0_230, t1_230;
+MSKand_opini2_d2 u_generate_230 (
+    .ina({a[461], a[460]}), .inb({b[461], b0_eff_230}),
+    .rnd(r[460]), .s(s[460]), .clk(clk), .out({g1_230, g0_230}));
+MSKand_opini2_d2 u_propagate_230 (
+    .ina({carry1[230], carry0[230]}), .inb({p1_230, p0_230}),
+    .rnd(r[461]), .s(s[461]), .clk(clk), .out({t1_230, t0_230}));
+assign carry0[231] = g0_230 ^ t0_230;
+assign carry1[231] = g1_230 ^ t1_230;
+assign sum[460]   = p0_230 ^ carry0[230];
+assign sum[461] = p1_230 ^ carry1[230];
+
+// ---- bit 231 ----
+wire b0_eff_231 = b[462] ^ sub;
+wire p0_231 = a[462]   ^ b0_eff_231;
+wire p1_231 = a[463] ^ b[463];
+wire g0_231, g1_231, t0_231, t1_231;
+MSKand_opini2_d2 u_generate_231 (
+    .ina({a[463], a[462]}), .inb({b[463], b0_eff_231}),
+    .rnd(r[462]), .s(s[462]), .clk(clk), .out({g1_231, g0_231}));
+MSKand_opini2_d2 u_propagate_231 (
+    .ina({carry1[231], carry0[231]}), .inb({p1_231, p0_231}),
+    .rnd(r[463]), .s(s[463]), .clk(clk), .out({t1_231, t0_231}));
+assign carry0[232] = g0_231 ^ t0_231;
+assign carry1[232] = g1_231 ^ t1_231;
+assign sum[462]   = p0_231 ^ carry0[231];
+assign sum[463] = p1_231 ^ carry1[231];
+
+// ---- bit 232 ----
+wire b0_eff_232 = b[464] ^ sub;
+wire p0_232 = a[464]   ^ b0_eff_232;
+wire p1_232 = a[465] ^ b[465];
+wire g0_232, g1_232, t0_232, t1_232;
+MSKand_opini2_d2 u_generate_232 (
+    .ina({a[465], a[464]}), .inb({b[465], b0_eff_232}),
+    .rnd(r[464]), .s(s[464]), .clk(clk), .out({g1_232, g0_232}));
+MSKand_opini2_d2 u_propagate_232 (
+    .ina({carry1[232], carry0[232]}), .inb({p1_232, p0_232}),
+    .rnd(r[465]), .s(s[465]), .clk(clk), .out({t1_232, t0_232}));
+assign carry0[233] = g0_232 ^ t0_232;
+assign carry1[233] = g1_232 ^ t1_232;
+assign sum[464]   = p0_232 ^ carry0[232];
+assign sum[465] = p1_232 ^ carry1[232];
+
+// ---- bit 233 ----
+wire b0_eff_233 = b[466] ^ sub;
+wire p0_233 = a[466]   ^ b0_eff_233;
+wire p1_233 = a[467] ^ b[467];
+wire g0_233, g1_233, t0_233, t1_233;
+MSKand_opini2_d2 u_generate_233 (
+    .ina({a[467], a[466]}), .inb({b[467], b0_eff_233}),
+    .rnd(r[466]), .s(s[466]), .clk(clk), .out({g1_233, g0_233}));
+MSKand_opini2_d2 u_propagate_233 (
+    .ina({carry1[233], carry0[233]}), .inb({p1_233, p0_233}),
+    .rnd(r[467]), .s(s[467]), .clk(clk), .out({t1_233, t0_233}));
+assign carry0[234] = g0_233 ^ t0_233;
+assign carry1[234] = g1_233 ^ t1_233;
+assign sum[466]   = p0_233 ^ carry0[233];
+assign sum[467] = p1_233 ^ carry1[233];
+
+// ---- bit 234 ----
+wire b0_eff_234 = b[468] ^ sub;
+wire p0_234 = a[468]   ^ b0_eff_234;
+wire p1_234 = a[469] ^ b[469];
+wire g0_234, g1_234, t0_234, t1_234;
+MSKand_opini2_d2 u_generate_234 (
+    .ina({a[469], a[468]}), .inb({b[469], b0_eff_234}),
+    .rnd(r[468]), .s(s[468]), .clk(clk), .out({g1_234, g0_234}));
+MSKand_opini2_d2 u_propagate_234 (
+    .ina({carry1[234], carry0[234]}), .inb({p1_234, p0_234}),
+    .rnd(r[469]), .s(s[469]), .clk(clk), .out({t1_234, t0_234}));
+assign carry0[235] = g0_234 ^ t0_234;
+assign carry1[235] = g1_234 ^ t1_234;
+assign sum[468]   = p0_234 ^ carry0[234];
+assign sum[469] = p1_234 ^ carry1[234];
+
+// ---- bit 235 ----
+wire b0_eff_235 = b[470] ^ sub;
+wire p0_235 = a[470]   ^ b0_eff_235;
+wire p1_235 = a[471] ^ b[471];
+wire g0_235, g1_235, t0_235, t1_235;
+MSKand_opini2_d2 u_generate_235 (
+    .ina({a[471], a[470]}), .inb({b[471], b0_eff_235}),
+    .rnd(r[470]), .s(s[470]), .clk(clk), .out({g1_235, g0_235}));
+MSKand_opini2_d2 u_propagate_235 (
+    .ina({carry1[235], carry0[235]}), .inb({p1_235, p0_235}),
+    .rnd(r[471]), .s(s[471]), .clk(clk), .out({t1_235, t0_235}));
+assign carry0[236] = g0_235 ^ t0_235;
+assign carry1[236] = g1_235 ^ t1_235;
+assign sum[470]   = p0_235 ^ carry0[235];
+assign sum[471] = p1_235 ^ carry1[235];
+
+// ---- bit 236 ----
+wire b0_eff_236 = b[472] ^ sub;
+wire p0_236 = a[472]   ^ b0_eff_236;
+wire p1_236 = a[473] ^ b[473];
+wire g0_236, g1_236, t0_236, t1_236;
+MSKand_opini2_d2 u_generate_236 (
+    .ina({a[473], a[472]}), .inb({b[473], b0_eff_236}),
+    .rnd(r[472]), .s(s[472]), .clk(clk), .out({g1_236, g0_236}));
+MSKand_opini2_d2 u_propagate_236 (
+    .ina({carry1[236], carry0[236]}), .inb({p1_236, p0_236}),
+    .rnd(r[473]), .s(s[473]), .clk(clk), .out({t1_236, t0_236}));
+assign carry0[237] = g0_236 ^ t0_236;
+assign carry1[237] = g1_236 ^ t1_236;
+assign sum[472]   = p0_236 ^ carry0[236];
+assign sum[473] = p1_236 ^ carry1[236];
+
+// ---- bit 237 ----
+wire b0_eff_237 = b[474] ^ sub;
+wire p0_237 = a[474]   ^ b0_eff_237;
+wire p1_237 = a[475] ^ b[475];
+wire g0_237, g1_237, t0_237, t1_237;
+MSKand_opini2_d2 u_generate_237 (
+    .ina({a[475], a[474]}), .inb({b[475], b0_eff_237}),
+    .rnd(r[474]), .s(s[474]), .clk(clk), .out({g1_237, g0_237}));
+MSKand_opini2_d2 u_propagate_237 (
+    .ina({carry1[237], carry0[237]}), .inb({p1_237, p0_237}),
+    .rnd(r[475]), .s(s[475]), .clk(clk), .out({t1_237, t0_237}));
+assign carry0[238] = g0_237 ^ t0_237;
+assign carry1[238] = g1_237 ^ t1_237;
+assign sum[474]   = p0_237 ^ carry0[237];
+assign sum[475] = p1_237 ^ carry1[237];
+
+// ---- bit 238 ----
+wire b0_eff_238 = b[476] ^ sub;
+wire p0_238 = a[476]   ^ b0_eff_238;
+wire p1_238 = a[477] ^ b[477];
+wire g0_238, g1_238, t0_238, t1_238;
+MSKand_opini2_d2 u_generate_238 (
+    .ina({a[477], a[476]}), .inb({b[477], b0_eff_238}),
+    .rnd(r[476]), .s(s[476]), .clk(clk), .out({g1_238, g0_238}));
+MSKand_opini2_d2 u_propagate_238 (
+    .ina({carry1[238], carry0[238]}), .inb({p1_238, p0_238}),
+    .rnd(r[477]), .s(s[477]), .clk(clk), .out({t1_238, t0_238}));
+assign carry0[239] = g0_238 ^ t0_238;
+assign carry1[239] = g1_238 ^ t1_238;
+assign sum[476]   = p0_238 ^ carry0[238];
+assign sum[477] = p1_238 ^ carry1[238];
+
+// ---- bit 239 ----
+wire b0_eff_239 = b[478] ^ sub;
+wire p0_239 = a[478]   ^ b0_eff_239;
+wire p1_239 = a[479] ^ b[479];
+wire g0_239, g1_239, t0_239, t1_239;
+MSKand_opini2_d2 u_generate_239 (
+    .ina({a[479], a[478]}), .inb({b[479], b0_eff_239}),
+    .rnd(r[478]), .s(s[478]), .clk(clk), .out({g1_239, g0_239}));
+MSKand_opini2_d2 u_propagate_239 (
+    .ina({carry1[239], carry0[239]}), .inb({p1_239, p0_239}),
+    .rnd(r[479]), .s(s[479]), .clk(clk), .out({t1_239, t0_239}));
+assign carry0[240] = g0_239 ^ t0_239;
+assign carry1[240] = g1_239 ^ t1_239;
+assign sum[478]   = p0_239 ^ carry0[239];
+assign sum[479] = p1_239 ^ carry1[239];
+
+// ---- bit 240 ----
+wire b0_eff_240 = b[480] ^ sub;
+wire p0_240 = a[480]   ^ b0_eff_240;
+wire p1_240 = a[481] ^ b[481];
+wire g0_240, g1_240, t0_240, t1_240;
+MSKand_opini2_d2 u_generate_240 (
+    .ina({a[481], a[480]}), .inb({b[481], b0_eff_240}),
+    .rnd(r[480]), .s(s[480]), .clk(clk), .out({g1_240, g0_240}));
+MSKand_opini2_d2 u_propagate_240 (
+    .ina({carry1[240], carry0[240]}), .inb({p1_240, p0_240}),
+    .rnd(r[481]), .s(s[481]), .clk(clk), .out({t1_240, t0_240}));
+assign carry0[241] = g0_240 ^ t0_240;
+assign carry1[241] = g1_240 ^ t1_240;
+assign sum[480]   = p0_240 ^ carry0[240];
+assign sum[481] = p1_240 ^ carry1[240];
+
+// ---- bit 241 ----
+wire b0_eff_241 = b[482] ^ sub;
+wire p0_241 = a[482]   ^ b0_eff_241;
+wire p1_241 = a[483] ^ b[483];
+wire g0_241, g1_241, t0_241, t1_241;
+MSKand_opini2_d2 u_generate_241 (
+    .ina({a[483], a[482]}), .inb({b[483], b0_eff_241}),
+    .rnd(r[482]), .s(s[482]), .clk(clk), .out({g1_241, g0_241}));
+MSKand_opini2_d2 u_propagate_241 (
+    .ina({carry1[241], carry0[241]}), .inb({p1_241, p0_241}),
+    .rnd(r[483]), .s(s[483]), .clk(clk), .out({t1_241, t0_241}));
+assign carry0[242] = g0_241 ^ t0_241;
+assign carry1[242] = g1_241 ^ t1_241;
+assign sum[482]   = p0_241 ^ carry0[241];
+assign sum[483] = p1_241 ^ carry1[241];
+
+// ---- bit 242 ----
+wire b0_eff_242 = b[484] ^ sub;
+wire p0_242 = a[484]   ^ b0_eff_242;
+wire p1_242 = a[485] ^ b[485];
+wire g0_242, g1_242, t0_242, t1_242;
+MSKand_opini2_d2 u_generate_242 (
+    .ina({a[485], a[484]}), .inb({b[485], b0_eff_242}),
+    .rnd(r[484]), .s(s[484]), .clk(clk), .out({g1_242, g0_242}));
+MSKand_opini2_d2 u_propagate_242 (
+    .ina({carry1[242], carry0[242]}), .inb({p1_242, p0_242}),
+    .rnd(r[485]), .s(s[485]), .clk(clk), .out({t1_242, t0_242}));
+assign carry0[243] = g0_242 ^ t0_242;
+assign carry1[243] = g1_242 ^ t1_242;
+assign sum[484]   = p0_242 ^ carry0[242];
+assign sum[485] = p1_242 ^ carry1[242];
+
+// ---- bit 243 ----
+wire b0_eff_243 = b[486] ^ sub;
+wire p0_243 = a[486]   ^ b0_eff_243;
+wire p1_243 = a[487] ^ b[487];
+wire g0_243, g1_243, t0_243, t1_243;
+MSKand_opini2_d2 u_generate_243 (
+    .ina({a[487], a[486]}), .inb({b[487], b0_eff_243}),
+    .rnd(r[486]), .s(s[486]), .clk(clk), .out({g1_243, g0_243}));
+MSKand_opini2_d2 u_propagate_243 (
+    .ina({carry1[243], carry0[243]}), .inb({p1_243, p0_243}),
+    .rnd(r[487]), .s(s[487]), .clk(clk), .out({t1_243, t0_243}));
+assign carry0[244] = g0_243 ^ t0_243;
+assign carry1[244] = g1_243 ^ t1_243;
+assign sum[486]   = p0_243 ^ carry0[243];
+assign sum[487] = p1_243 ^ carry1[243];
+
+// ---- bit 244 ----
+wire b0_eff_244 = b[488] ^ sub;
+wire p0_244 = a[488]   ^ b0_eff_244;
+wire p1_244 = a[489] ^ b[489];
+wire g0_244, g1_244, t0_244, t1_244;
+MSKand_opini2_d2 u_generate_244 (
+    .ina({a[489], a[488]}), .inb({b[489], b0_eff_244}),
+    .rnd(r[488]), .s(s[488]), .clk(clk), .out({g1_244, g0_244}));
+MSKand_opini2_d2 u_propagate_244 (
+    .ina({carry1[244], carry0[244]}), .inb({p1_244, p0_244}),
+    .rnd(r[489]), .s(s[489]), .clk(clk), .out({t1_244, t0_244}));
+assign carry0[245] = g0_244 ^ t0_244;
+assign carry1[245] = g1_244 ^ t1_244;
+assign sum[488]   = p0_244 ^ carry0[244];
+assign sum[489] = p1_244 ^ carry1[244];
+
+// ---- bit 245 ----
+wire b0_eff_245 = b[490] ^ sub;
+wire p0_245 = a[490]   ^ b0_eff_245;
+wire p1_245 = a[491] ^ b[491];
+wire g0_245, g1_245, t0_245, t1_245;
+MSKand_opini2_d2 u_generate_245 (
+    .ina({a[491], a[490]}), .inb({b[491], b0_eff_245}),
+    .rnd(r[490]), .s(s[490]), .clk(clk), .out({g1_245, g0_245}));
+MSKand_opini2_d2 u_propagate_245 (
+    .ina({carry1[245], carry0[245]}), .inb({p1_245, p0_245}),
+    .rnd(r[491]), .s(s[491]), .clk(clk), .out({t1_245, t0_245}));
+assign carry0[246] = g0_245 ^ t0_245;
+assign carry1[246] = g1_245 ^ t1_245;
+assign sum[490]   = p0_245 ^ carry0[245];
+assign sum[491] = p1_245 ^ carry1[245];
+
+// ---- bit 246 ----
+wire b0_eff_246 = b[492] ^ sub;
+wire p0_246 = a[492]   ^ b0_eff_246;
+wire p1_246 = a[493] ^ b[493];
+wire g0_246, g1_246, t0_246, t1_246;
+MSKand_opini2_d2 u_generate_246 (
+    .ina({a[493], a[492]}), .inb({b[493], b0_eff_246}),
+    .rnd(r[492]), .s(s[492]), .clk(clk), .out({g1_246, g0_246}));
+MSKand_opini2_d2 u_propagate_246 (
+    .ina({carry1[246], carry0[246]}), .inb({p1_246, p0_246}),
+    .rnd(r[493]), .s(s[493]), .clk(clk), .out({t1_246, t0_246}));
+assign carry0[247] = g0_246 ^ t0_246;
+assign carry1[247] = g1_246 ^ t1_246;
+assign sum[492]   = p0_246 ^ carry0[246];
+assign sum[493] = p1_246 ^ carry1[246];
+
+// ---- bit 247 ----
+wire b0_eff_247 = b[494] ^ sub;
+wire p0_247 = a[494]   ^ b0_eff_247;
+wire p1_247 = a[495] ^ b[495];
+wire g0_247, g1_247, t0_247, t1_247;
+MSKand_opini2_d2 u_generate_247 (
+    .ina({a[495], a[494]}), .inb({b[495], b0_eff_247}),
+    .rnd(r[494]), .s(s[494]), .clk(clk), .out({g1_247, g0_247}));
+MSKand_opini2_d2 u_propagate_247 (
+    .ina({carry1[247], carry0[247]}), .inb({p1_247, p0_247}),
+    .rnd(r[495]), .s(s[495]), .clk(clk), .out({t1_247, t0_247}));
+assign carry0[248] = g0_247 ^ t0_247;
+assign carry1[248] = g1_247 ^ t1_247;
+assign sum[494]   = p0_247 ^ carry0[247];
+assign sum[495] = p1_247 ^ carry1[247];
+
+// ---- bit 248 ----
+wire b0_eff_248 = b[496] ^ sub;
+wire p0_248 = a[496]   ^ b0_eff_248;
+wire p1_248 = a[497] ^ b[497];
+wire g0_248, g1_248, t0_248, t1_248;
+MSKand_opini2_d2 u_generate_248 (
+    .ina({a[497], a[496]}), .inb({b[497], b0_eff_248}),
+    .rnd(r[496]), .s(s[496]), .clk(clk), .out({g1_248, g0_248}));
+MSKand_opini2_d2 u_propagate_248 (
+    .ina({carry1[248], carry0[248]}), .inb({p1_248, p0_248}),
+    .rnd(r[497]), .s(s[497]), .clk(clk), .out({t1_248, t0_248}));
+assign carry0[249] = g0_248 ^ t0_248;
+assign carry1[249] = g1_248 ^ t1_248;
+assign sum[496]   = p0_248 ^ carry0[248];
+assign sum[497] = p1_248 ^ carry1[248];
+
+// ---- bit 249 ----
+wire b0_eff_249 = b[498] ^ sub;
+wire p0_249 = a[498]   ^ b0_eff_249;
+wire p1_249 = a[499] ^ b[499];
+wire g0_249, g1_249, t0_249, t1_249;
+MSKand_opini2_d2 u_generate_249 (
+    .ina({a[499], a[498]}), .inb({b[499], b0_eff_249}),
+    .rnd(r[498]), .s(s[498]), .clk(clk), .out({g1_249, g0_249}));
+MSKand_opini2_d2 u_propagate_249 (
+    .ina({carry1[249], carry0[249]}), .inb({p1_249, p0_249}),
+    .rnd(r[499]), .s(s[499]), .clk(clk), .out({t1_249, t0_249}));
+assign carry0[250] = g0_249 ^ t0_249;
+assign carry1[250] = g1_249 ^ t1_249;
+assign sum[498]   = p0_249 ^ carry0[249];
+assign sum[499] = p1_249 ^ carry1[249];
+
+// ---- bit 250 ----
+wire b0_eff_250 = b[500] ^ sub;
+wire p0_250 = a[500]   ^ b0_eff_250;
+wire p1_250 = a[501] ^ b[501];
+wire g0_250, g1_250, t0_250, t1_250;
+MSKand_opini2_d2 u_generate_250 (
+    .ina({a[501], a[500]}), .inb({b[501], b0_eff_250}),
+    .rnd(r[500]), .s(s[500]), .clk(clk), .out({g1_250, g0_250}));
+MSKand_opini2_d2 u_propagate_250 (
+    .ina({carry1[250], carry0[250]}), .inb({p1_250, p0_250}),
+    .rnd(r[501]), .s(s[501]), .clk(clk), .out({t1_250, t0_250}));
+assign carry0[251] = g0_250 ^ t0_250;
+assign carry1[251] = g1_250 ^ t1_250;
+assign sum[500]   = p0_250 ^ carry0[250];
+assign sum[501] = p1_250 ^ carry1[250];
+
+// ---- bit 251 ----
+wire b0_eff_251 = b[502] ^ sub;
+wire p0_251 = a[502]   ^ b0_eff_251;
+wire p1_251 = a[503] ^ b[503];
+wire g0_251, g1_251, t0_251, t1_251;
+MSKand_opini2_d2 u_generate_251 (
+    .ina({a[503], a[502]}), .inb({b[503], b0_eff_251}),
+    .rnd(r[502]), .s(s[502]), .clk(clk), .out({g1_251, g0_251}));
+MSKand_opini2_d2 u_propagate_251 (
+    .ina({carry1[251], carry0[251]}), .inb({p1_251, p0_251}),
+    .rnd(r[503]), .s(s[503]), .clk(clk), .out({t1_251, t0_251}));
+assign carry0[252] = g0_251 ^ t0_251;
+assign carry1[252] = g1_251 ^ t1_251;
+assign sum[502]   = p0_251 ^ carry0[251];
+assign sum[503] = p1_251 ^ carry1[251];
+
+// ---- bit 252 ----
+wire b0_eff_252 = b[504] ^ sub;
+wire p0_252 = a[504]   ^ b0_eff_252;
+wire p1_252 = a[505] ^ b[505];
+wire g0_252, g1_252, t0_252, t1_252;
+MSKand_opini2_d2 u_generate_252 (
+    .ina({a[505], a[504]}), .inb({b[505], b0_eff_252}),
+    .rnd(r[504]), .s(s[504]), .clk(clk), .out({g1_252, g0_252}));
+MSKand_opini2_d2 u_propagate_252 (
+    .ina({carry1[252], carry0[252]}), .inb({p1_252, p0_252}),
+    .rnd(r[505]), .s(s[505]), .clk(clk), .out({t1_252, t0_252}));
+assign carry0[253] = g0_252 ^ t0_252;
+assign carry1[253] = g1_252 ^ t1_252;
+assign sum[504]   = p0_252 ^ carry0[252];
+assign sum[505] = p1_252 ^ carry1[252];
+
+// ---- bit 253 ----
+wire b0_eff_253 = b[506] ^ sub;
+wire p0_253 = a[506]   ^ b0_eff_253;
+wire p1_253 = a[507] ^ b[507];
+wire g0_253, g1_253, t0_253, t1_253;
+MSKand_opini2_d2 u_generate_253 (
+    .ina({a[507], a[506]}), .inb({b[507], b0_eff_253}),
+    .rnd(r[506]), .s(s[506]), .clk(clk), .out({g1_253, g0_253}));
+MSKand_opini2_d2 u_propagate_253 (
+    .ina({carry1[253], carry0[253]}), .inb({p1_253, p0_253}),
+    .rnd(r[507]), .s(s[507]), .clk(clk), .out({t1_253, t0_253}));
+assign carry0[254] = g0_253 ^ t0_253;
+assign carry1[254] = g1_253 ^ t1_253;
+assign sum[506]   = p0_253 ^ carry0[253];
+assign sum[507] = p1_253 ^ carry1[253];
+
+// ---- bit 254 ----
+wire b0_eff_254 = b[508] ^ sub;
+wire p0_254 = a[508]   ^ b0_eff_254;
+wire p1_254 = a[509] ^ b[509];
+wire g0_254, g1_254, t0_254, t1_254;
+MSKand_opini2_d2 u_generate_254 (
+    .ina({a[509], a[508]}), .inb({b[509], b0_eff_254}),
+    .rnd(r[508]), .s(s[508]), .clk(clk), .out({g1_254, g0_254}));
+MSKand_opini2_d2 u_propagate_254 (
+    .ina({carry1[254], carry0[254]}), .inb({p1_254, p0_254}),
+    .rnd(r[509]), .s(s[509]), .clk(clk), .out({t1_254, t0_254}));
+assign carry0[255] = g0_254 ^ t0_254;
+assign carry1[255] = g1_254 ^ t1_254;
+assign sum[508]   = p0_254 ^ carry0[254];
+assign sum[509] = p1_254 ^ carry1[254];
+
+// ---- bit 255 ----
+wire b0_eff_255 = b[510] ^ sub;
+wire p0_255 = a[510]   ^ b0_eff_255;
+wire p1_255 = a[511] ^ b[511];
+wire g0_255, g1_255, t0_255, t1_255;
+MSKand_opini2_d2 u_generate_255 (
+    .ina({a[511], a[510]}), .inb({b[511], b0_eff_255}),
+    .rnd(r[510]), .s(s[510]), .clk(clk), .out({g1_255, g0_255}));
+MSKand_opini2_d2 u_propagate_255 (
+    .ina({carry1[255], carry0[255]}), .inb({p1_255, p0_255}),
+    .rnd(r[511]), .s(s[511]), .clk(clk), .out({t1_255, t0_255}));
+assign carry0[256] = g0_255 ^ t0_255;
+assign carry1[256] = g1_255 ^ t1_255;
+assign sum[510]   = p0_255 ^ carry0[255];
+assign sum[511] = p1_255 ^ carry1[255];
+
+assign cout = {carry1[256], carry0[256]};
+
+// BUG UNDER TEST: recombine the two shares of sum bit 0.
+(* keep *) reg leak;
+always @(posedge clk) leak <= sum[0] ^ sum[1];
+assign leak_o = out_act & leak;
+
+endmodule

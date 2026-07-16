@@ -1,0 +1,37 @@
+# synth_mul256.ys — MATCHI-prep synthesis of the 256-bit masked carry-save
+# multiplier. Mirrors . (the flow that passed
+# the verified adder/iszero tops): NO flatten pass is ever run, techmap/abc are
+# per-module, so the MSKand_opini2_d2 gadget survives as a hierarchical
+# instance and its matchi_prop="OPINI"/matchi_strat="assumed" module
+# attributes reach the JSON — MATCHI black-boxes it as the assumed-OPINI leaf.
+# keep_hierarchy is set explicitly on the gadget as belt-and-braces.
+#
+# Run:  yosys synth_mul256.ys   (paths are absolute; cwd-independent)
+# Outputs land next to the sources in this directory.
+
+read_verilog ./MSKand_opini2_d2.v
+read_verilog ./mul256.v
+hierarchy -check -top mul256
+
+# Never inline the assumed-OPINI leaf.
+setattr -mod -set keep_hierarchy 1 MSKand_opini2_d2
+
+# Remove verilog high-level constructs, in favor of netlists
+proc
+# Map yosys RTL library to yosys Gate library.
+techmap
+# Map gates to the matchi_cells library.
+dfflibmap -liberty .
+abc -liberty .
+clean
+
+# Include the gate library in the netlist (gives cells the correct
+# "port_directions" attribute, same as the verified flows).
+read_verilog .
+proc
+hierarchy -check -top mul256
+
+# Outputs: json (for MATCHI analysis) and verilog (for simulation).
+write_json ./mul256_synth.json
+write_verilog -norename ./mul256_synth.v
+write_verilog -noattr -norename ./mul256_synth_noattr.v

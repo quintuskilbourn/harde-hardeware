@@ -1,0 +1,68 @@
+===== top_add256_opini2 sub=1  =====
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[2] is not sensitive, while marked as such.
+Warning: output port sum[3] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[2] is not sensitive, while marked as such.
+Warning: output port sum[3] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[2] is not sensitive, while marked as such.
+Warning: output port sum[3] is not sensitive, while marked as such.
+Warning: output port sum[4] is not sensitive, while marked as such.
+MATCHI exit code: 0
+RC_opini2_sub1=0
+===== top_add256_pini sub=0  =====
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[2] is not sensitive, while marked as such.
+Warning: output port sum[3] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[2] is not sensitive, while marked as such.
+Warning: output port sum[3] is not sensitive, while marked as such.
+Warning: output port sum[0] is not sensitive, while marked as such.
+Warning: output port sum[1] is not sensitive, while marked as such.
+Warning: output port sum[2] is not sensitive, while marked as such.
+Warning: output port sum[3] is not sensitive, while marked as such.
+Warning: output port sum[4] is not sensitive, while marked as such.
+MATCHI exit code: 0
+RC_pini=0
+===== top_add256_rndreuse sub=0  =====
+Warning: output port cout[0] is not sensitive, while marked as such.
+Warning: output port cout[1] is not sensitive, while marked as such.
+Error: Random input r[0] at cycle 5 is used in multiple places:
+MATCHI exit code: 1
+RC_rndreuse=1
+===== top_add256_recomb sub=0 RECOMB =====
+Error: In module top_add256_recomb, checking instance $abc$9976$auto$blifparse.cc:397:parse_blif$12045
+Caused by:
+    Gate has input sensitive in multiple shares (causes glitch leakage):
+MATCHI exit code: 1
+RC_recomb=1

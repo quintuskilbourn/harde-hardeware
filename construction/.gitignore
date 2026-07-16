@@ -1,0 +1,6 @@
+work_*/
+*_synth*.v
+*_synth*.json
+*.vcd
+matchi.log
+matrix_*.out
